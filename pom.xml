@@ -13,6 +13,7 @@
     <modules>
         <module>template-plugin</module>
         <module>context-mapper-task</module>
+        <module>regex-validation</module>
     </modules>
 
     <licenses>

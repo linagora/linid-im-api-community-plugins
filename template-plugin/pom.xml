@@ -1,0 +1,23 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.github.linagora.linid.im</groupId>
+        <artifactId>linid-im-api-community-plugins</artifactId>
+        <version>0.1.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>template-plugin</artifactId>
+    <version>0.1.0</version>
+    <name>Template Plugin for linid-im-api</name>
+    <description>A starter template plugin to build new plugins</description>
+
+    <dependencies>
+        <!-- Add here dependencies specific to this plugin if needed -->
+    </dependencies>
+
+</project>

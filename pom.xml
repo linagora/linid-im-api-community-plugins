@@ -49,6 +49,7 @@
         <sonar.projectName>linid-im-api-community-plugins</sonar.projectName>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.organization>linagora-sonarcube-255</sonar.organization>
+        <sonar.coverage.jacoco.xmlReportPaths>**/target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
     <dependencyManagement>
@@ -222,27 +223,6 @@
                     </configuration>
                 </plugin>
 
-                <!-- JaCoCo plugin for code coverage -->
-                <plugin>
-                    <groupId>org.jacoco</groupId>
-                    <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.8.13</version>
-                    <executions>
-                        <execution>
-                            <id>prepare-agent</id> <!-- Added unique id -->
-                            <goals>
-                                <goal>prepare-agent</goal>
-                            </goals>
-                        </execution>
-                        <execution>
-                            <id>generate-report</id> <!-- Added unique id -->
-                            <goals>
-                                <goal>report</goal>
-                            </goals>
-                            <phase>verify</phase>
-                        </execution>
-                    </executions>
-                </plugin>
                 <!-- Pitest plugin for mutation tests -->
                 <plugin>
                     <groupId>org.pitest</groupId>

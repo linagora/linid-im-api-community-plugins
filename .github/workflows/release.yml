@@ -53,9 +53,7 @@ jobs:
 
       - name: Release new version
         working-directory: ${{ matrix.plugin }}
-        run: mvn io.github.zorin95670:semantic-version:0.4.0:release \
-          -DtagPrefix=${{ matrix.plugin }}-v \
-          -Dscope=${{matrix.plugin }}
+        run: mvn io.github.zorin95670:semantic-version:0.4.0:release -DtagPrefix=${{ matrix.plugin }}-v -Dscope=${{matrix.plugin }}
 
       - name: Build and publish to Maven Central
         working-directory: plugins/${{ matrix.plugin }}

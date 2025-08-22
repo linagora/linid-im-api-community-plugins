@@ -32,7 +32,7 @@ jobs:
           sleep 5
 
       - name: Execute unit tests
-        run: mvn -ntp test
+        run: mvn -ntp clean verify
 
       - name: Execute sonar scan
         env:

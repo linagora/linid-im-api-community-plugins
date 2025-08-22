@@ -1,0 +1,6 @@
+{
+  "hpp.error400": "Bad request. Please check your input.",
+  "hpp.error500": "Internal server error. Please try again later.",
+  "hpp.error.delete": "Entity deletion failed.",
+  "hpp.error.json": "Received invalid json from response"
+}

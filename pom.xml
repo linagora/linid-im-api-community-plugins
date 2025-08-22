@@ -14,6 +14,7 @@
         <module>template-plugin</module>
         <module>context-mapper-task</module>
         <module>regex-validation</module>
+        <module>http-provider</module>
     </modules>
 
     <licenses>

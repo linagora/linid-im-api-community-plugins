@@ -1,0 +1,6 @@
+{
+  "hpp.error400": "Requête invalide. Veuillez vérifier les données envoyées.",
+  "hpp.error500": "Erreur interne du serveur. Veuillez réessayer plus tard.",
+  "hpp.error.delete": "Impossible de supprimer l'entité.",
+  "hpp.error.json": "Réponse JSON invalide reçue"
+}

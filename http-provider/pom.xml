@@ -15,9 +15,9 @@
         <sonar.projectBaseDir>http-provider</sonar.projectBaseDir>
     </properties>
 
-    <artifactId>http-provider-plugin</artifactId>
+    <artifactId>http-provider</artifactId>
     <version>0.1.0</version>
-    <name>http-provider-plugin</name>
+    <name>http-provider</name>
     <description>Plugin to manage http provider</description>
     <url>https://github.com/linagora/linid-im-api-community-plugins</url>
 

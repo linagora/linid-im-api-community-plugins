@@ -15,9 +15,9 @@
         <sonar.projectBaseDir>regex-validation</sonar.projectBaseDir>
     </properties>
 
-    <artifactId>regex-validation-plugin</artifactId>
+    <artifactId>regex-validation</artifactId>
     <version>0.1.0</version>
-    <name>regex-validation-plugin</name>
+    <name>regex-validation</name>
     <description>Plugin to validate field with regex</description>
     <url>https://github.com/linagora/linid-im-api-community-plugins</url>
 

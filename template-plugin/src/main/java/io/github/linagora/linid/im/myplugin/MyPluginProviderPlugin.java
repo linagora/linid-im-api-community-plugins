@@ -26,11 +26,11 @@
 
 package io.github.linagora.linid.im.myplugin;
 
-import lombok.extern.slf4j.Slf4j;
 import io.github.linagora.linid.im.corelib.plugin.config.dto.ProviderConfiguration;
 import io.github.linagora.linid.im.corelib.plugin.entity.DynamicEntity;
 import io.github.linagora.linid.im.corelib.plugin.provider.ProviderPlugin;
 import io.github.linagora.linid.im.corelib.plugin.task.TaskExecutionContext;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.lang.NonNull;

@@ -26,11 +26,11 @@
 
 package io.github.linagora.linid.im.myplugin;
 
-import java.util.Optional;
-import lombok.extern.slf4j.Slf4j;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import io.github.linagora.linid.im.corelib.plugin.config.dto.ValidationConfiguration;
 import io.github.linagora.linid.im.corelib.plugin.validation.ValidationPlugin;
+import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 

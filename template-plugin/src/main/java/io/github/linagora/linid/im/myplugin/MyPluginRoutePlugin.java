@@ -26,12 +26,12 @@
 
 package io.github.linagora.linid.im.myplugin;
 
-import jakarta.servlet.http.HttpServletRequest;
-import java.util.List;
-import lombok.extern.slf4j.Slf4j;
 import io.github.linagora.linid.im.corelib.plugin.config.dto.EntityConfiguration;
 import io.github.linagora.linid.im.corelib.plugin.route.AbstractRoutePlugin;
 import io.github.linagora.linid.im.corelib.plugin.route.RouteDescription;
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;

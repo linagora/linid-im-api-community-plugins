@@ -175,6 +175,7 @@
           <consoleOutput>true</consoleOutput>
           <failOnViolation>true</failOnViolation>
           <violationSeverity>warning</violationSeverity>
+          <skip>${checkstyle.skip}</skip>
         </configuration>
         <executions>
           <execution>

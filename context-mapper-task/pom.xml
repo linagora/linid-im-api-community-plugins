@@ -15,9 +15,9 @@
         <sonar.projectBaseDir>context-mapper-task</sonar.projectBaseDir>
     </properties>
 
-    <artifactId>context-mapper-task-plugin</artifactId>
+    <artifactId>context-mapper-task</artifactId>
     <version>0.1.0</version>
-    <name>context-mapper-task-plugin</name>
+    <name>context-mapper-task</name>
     <description>Plugin to manage context.</description>
     <url>https://github.com/linagora/linid-im-api-community-plugins</url>
 

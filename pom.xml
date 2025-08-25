@@ -8,10 +8,10 @@
     <version>0.1.0</version>
   </parent>
   <groupId>io.github.linagora.linid.im</groupId>
-  <artifactId>rvp</artifactId>
+  <artifactId>cmtp</artifactId>
   <version>0.1.0</version>
-  <name>regex-validation</name>
-  <description>Plugin to validate field with regex</description>
+  <name>context-mapper-task</name>
+  <description>Plugin to manage context.</description>
   <url>https://github.com/linagora/linid-im-api-community-plugins</url>
   <licenses>
     <license>
@@ -34,6 +34,6 @@
     <url>https://github.com/linagora/linid-im-api-community-plugins</url>
   </scm>
   <properties>
-    <sonar.projectBaseDir>rvp</sonar.projectBaseDir>
+    <sonar.projectBaseDir>cmtp</sonar.projectBaseDir>
   </properties>
 </project>

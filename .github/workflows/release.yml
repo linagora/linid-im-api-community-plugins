@@ -71,9 +71,12 @@ jobs:
           PLUGINS=$(echo '${{ needs.detect-plugins.outputs.matrix }}' | jq -r '.[]')
           for plugin in $PLUGINS; do
             echo "🔹 Releasing $plugin"
+            cd "$plugin"
             # Semantic version release
             mvn -ntp io.github.zorin95670:semantic-version:0.4.1:release \
-              -DtagPrefix=${plugin}-v -Dscope=$plugin -f $plugin/pom.xml
+              -DtagPrefix=${plugin}-v -Dscope=$plugin
+            cd ..
+            git log
           done
 
       - name: Build and deploy plugins to Maven Central

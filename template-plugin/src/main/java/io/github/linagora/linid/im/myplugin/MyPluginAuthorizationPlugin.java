@@ -26,12 +26,12 @@
 
 package io.github.linagora.linid.im.myplugin;
 
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.extern.slf4j.Slf4j;
 import io.github.linagora.linid.im.corelib.plugin.authorization.AbstractAuthorizationPlugin;
 import io.github.linagora.linid.im.corelib.plugin.config.dto.RootConfiguration;
 import io.github.linagora.linid.im.corelib.plugin.entity.DynamicEntity;
 import io.github.linagora.linid.im.corelib.plugin.task.TaskExecutionContext;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;

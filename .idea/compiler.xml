@@ -8,11 +8,15 @@
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.38/lombok-1.18.38.jar" />
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.38/lombok-1.18.38.jar" />
         </processorPath>
         <module name="context-mapper-task-plugin" />
         <module name="http-provider-plugin" />
         <module name="template-plugin" />
+        <module name="http-provider" />
+        <module name="context-mapper-task" />
         <module name="regex-validation-plugin" />
+        <module name="regex-validation" />
       </profile>
     </annotationProcessing>
   </component>

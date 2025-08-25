@@ -51,12 +51,29 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Get modified plugins
         id: set-matrix
         run: |
-          echo "🔍 Detecting modified plugins..."
-          PLUGINS=$(git log -1 --pretty=format:%B \
+          echo "🔍 Detecting modified plugins from commit messages..."
+
+          # Get last tag or empty if none
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+
+          if [ -n "$LAST_TAG" ]; then
+            echo "Last tag found: $LAST_TAG"
+            RANGE="$LAST_TAG..HEAD"
+          else
+            echo "No tag found, using all commits"
+            RANGE="$(git rev-list --max-parents=0 HEAD)..HEAD"
+          fi
+
+          echo "Using range: $RANGE"
+
+          # Extract plugin names from commit messages like: feat(plugin): message
+          PLUGINS=$(git log $RANGE --pretty=format:"%s" \
             | grep -oP '(?<=\().+?(?=\))' \
             | sort -u \
             | grep -v '^template-plugin$' \
@@ -80,6 +97,4 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
       - name: Run checkstyle on plugin
-        run: |
-          cd ${{ matrix.plugin }}
-          mvn -ntp checkstyle:check
+        run: mvn -ntp checkstyle:check -pl ${{ matrix.plugin }} -am

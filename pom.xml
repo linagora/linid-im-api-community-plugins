@@ -199,7 +199,7 @@
         <configuration>
           <java>
             <licenseHeader>
-              <file>${project.basedir}/checkstyle/java.header</file>
+              <file>${session.executionRootDirectory}/checkstyle/java.header</file>
             </licenseHeader>
           </java>
         </configuration>

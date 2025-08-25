@@ -25,14 +25,14 @@ jobs:
           node-version: '18'
 
       - name: Start fake HTTP server for http-provider
-        working-directory: http-provider/src/test/fake-http-server
+        working-directory: hpp/src/test/fake-http-server
         run: |
           npm install
           npm run start &
           sleep 5
 
       - name: Execute unit tests
-        run: mvn -ntp clean verify
+        run: mvn -ntp -Dgpg.skip=true clean verify
 
       - name: Execute sonar scan
         env:

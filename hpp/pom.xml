@@ -12,13 +12,14 @@
     </parent>
 
     <properties>
-        <sonar.projectBaseDir>context-mapper-task</sonar.projectBaseDir>
+        <sonar.projectBaseDir>hpp</sonar.projectBaseDir>
     </properties>
 
-    <artifactId>context-mapper-task</artifactId>
+    <groupId>io.github.linagora.linid.im</groupId>
+    <artifactId>hpp</artifactId>
     <version>0.1.0</version>
-    <name>context-mapper-task</name>
-    <description>Plugin to manage context.</description>
+    <name>http-provider</name>
+    <description>Plugin to manage http provider</description>
     <url>https://github.com/linagora/linid-im-api-community-plugins</url>
 
     <licenses>
@@ -45,7 +46,12 @@
     </scm>
 
     <dependencies>
-        <!-- Add here dependencies specific to this plugin if needed -->
+        <dependency>
+            <groupId>com.hubspot.jinjava</groupId>
+            <artifactId>jinjava</artifactId>
+            <version>2.8.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>

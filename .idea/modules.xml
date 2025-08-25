@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/http-provider/http-provider-plugin.iml" filepath="$PROJECT_DIR$/http-provider/http-provider-plugin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/http-provider/hpp.iml" filepath="$PROJECT_DIR$/http-provider/hpp.iml" />
     </modules>
   </component>
 </project>

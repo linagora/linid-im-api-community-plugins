@@ -4,7 +4,7 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
-      - 'http-provider/**'
+      - 'hpp/**'
 
 jobs:
   tests:
@@ -25,7 +25,7 @@ jobs:
           node-version: '18'
 
       - name: Start fake HTTP server
-        working-directory: http-provider/src/test/fake-http-server
+        working-directory: hpp/src/test/fake-http-server
         run: |
           npm install
           npm run start &
@@ -35,15 +35,15 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y pandoc
 
       - name: Execute unit tests
-        run: mvn -ntp -pl http-provider test
+        run: mvn -ntp -pl hpp test
 
       - name: Execute mutation tests
-        run: mvn -ntp -pl http-provider org.pitest:pitest-maven:mutationCoverage
+        run: mvn -ntp -pl hpp org.pitest:pitest-maven:mutationCoverage
 
       - name: Extract summary from pitest
         run: |
           echo "<html><head></head><body><h1>Pit Test Coverage Report: http-provider</h1><h3>Project Summary</h3>" > pitest.html
-          perl -0777 -ne 'print "$1\n" if /(<table>.*?<\/table>)/s' http-provider/target/pit-reports/index.html >> pitest.html
+          perl -0777 -ne 'print "$1\n" if /(<table>.*?<\/table>)/s' hpp/target/pit-reports/index.html >> pitest.html
           echo "</body></html>" >> pitest.html
 
       - name: Convert pitest report to markdown

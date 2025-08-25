@@ -8,9 +8,9 @@
   <name>Community Plugins for linid-im-api</name>
   <modules>
     <module>template-plugin</module>
-    <module>context-mapper-task</module>
-    <module>regex-validation</module>
-    <module>http-provider</module>
+    <module>cmtp</module>
+    <module>rvp</module>
+    <module>hpp</module>
   </modules>
   <licenses>
     <license>
@@ -69,6 +69,11 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-webflux</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -301,7 +306,6 @@
         <extensions>true</extensions>
         <configuration>
           <publishingServerId>central</publishingServerId>
-          <waitUntil>published</waitUntil>
           <autoPublish>true</autoPublish>
         </configuration>
       </plugin>
@@ -310,6 +314,14 @@
         <artifactId>sonar-maven-plugin</artifactId>
         <version>5.0.0.4389</version>
       </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-deploy-plugin</artifactId>
+            <version>3.1.1</version>
+            <configuration>
+                <skip>true</skip>
+            </configuration>
+        </plugin>
     </plugins>
   </build>
 </project>

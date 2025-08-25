@@ -12,13 +12,14 @@
     </parent>
 
     <properties>
-        <sonar.projectBaseDir>http-provider</sonar.projectBaseDir>
+        <sonar.projectBaseDir>cmtp</sonar.projectBaseDir>
     </properties>
 
-    <artifactId>http-provider</artifactId>
+    <groupId>io.github.linagora.linid.im</groupId>
+    <artifactId>cmtp</artifactId>
     <version>0.1.0</version>
-    <name>http-provider</name>
-    <description>Plugin to manage http provider</description>
+    <name>context-mapper-task</name>
+    <description>Plugin to manage context.</description>
     <url>https://github.com/linagora/linid-im-api-community-plugins</url>
 
     <licenses>
@@ -45,16 +46,7 @@
     </scm>
 
     <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.hubspot.jinjava</groupId>
-            <artifactId>jinjava</artifactId>
-            <version>2.8.0</version>
-            <scope>test</scope>
-        </dependency>
+        <!-- Add here dependencies specific to this plugin if needed -->
     </dependencies>
 
 </project>

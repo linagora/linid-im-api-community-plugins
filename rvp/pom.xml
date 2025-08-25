@@ -12,10 +12,11 @@
     </parent>
 
     <properties>
-        <sonar.projectBaseDir>regex-validation</sonar.projectBaseDir>
+        <sonar.projectBaseDir>rvp</sonar.projectBaseDir>
     </properties>
 
-    <artifactId>regex-validation</artifactId>
+    <groupId>io.github.linagora.linid.im</groupId>
+    <artifactId>rvp</artifactId>
     <version>0.1.0</version>
     <name>regex-validation</name>
     <description>Plugin to validate field with regex</description>

@@ -82,22 +82,18 @@ public class ContextMapperTaskPlugin implements TaskPlugin {
     var removing = configuration.getOption("removing", new TypeReference<List<String>>() {})
         .orElse(List.of());
 
-    adding.forEach((key, value) -> {
-      context.put(
-          key,
-          jinjaService.render(context, value)
-      );
-    });
+    adding.forEach((key, value) -> context.put(
+        key,
+        jinjaService.render(context, value)
+    ));
 
-    mapping.forEach((inputKey, keys) -> {
-      Arrays.stream(keys.split(","))
-          .forEach(outputKey -> {
-            String template = templates.getOrDefault(String.format("%s.%s", inputKey, outputKey),  defaultTemplate);
-            String rendered = jinjaService.render(context, template);
+    mapping.forEach((inputKey, keys) -> Arrays.stream(keys.split(","))
+        .forEach(outputKey -> {
+          String template = templates.getOrDefault(String.format("%s.%s", inputKey, outputKey),  defaultTemplate);
+          String rendered = jinjaService.render(context, template);
 
-            context.put(outputKey, rendered);
-          });
-    });
+          context.put(outputKey, rendered);
+        }));
 
     removing.forEach(context::remove);
   }

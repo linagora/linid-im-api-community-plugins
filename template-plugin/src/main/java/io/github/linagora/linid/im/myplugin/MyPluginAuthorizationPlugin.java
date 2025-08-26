@@ -50,29 +50,29 @@ public class MyPluginAuthorizationPlugin extends AbstractAuthorizationPlugin {
 
   @Override
   public void updateConfiguration(RootConfiguration configuration) {
-      log.info("Update configuration of 'MyPlugin'");
+    log.info("Update configuration of 'MyPlugin'");
   }
 
   @Override
   public void validateToken(HttpServletRequest request, TaskExecutionContext context) {
-      log.info("validate token of 'MyPlugin'");
+    log.info("validate token of 'MyPlugin'");
   }
 
   @Override
   public void isAuthorized(HttpServletRequest request, DynamicEntity entity, String action, TaskExecutionContext context) {
-      log.info("validate default authorization of 'MyPlugin'");
+    log.info("validate default authorization of 'MyPlugin'");
   }
 
   @Override
   public void isAuthorized(HttpServletRequest request, DynamicEntity entity, String id, String action,
                            TaskExecutionContext context) {
-      log.info("validate authorization with id of 'MyPlugin'");
+    log.info("validate authorization with id of 'MyPlugin'");
   }
 
   @Override
   public void isAuthorized(HttpServletRequest request, DynamicEntity entity, MultiValueMap<String, String> filters,
                            String action,
                            TaskExecutionContext context) {
-      log.info("validate authorization with filters of 'MyPlugin'");
+    log.info("validate authorization with filters of 'MyPlugin'");
   }
 }

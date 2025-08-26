@@ -52,12 +52,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.util.LinkedMultiValueMap;
 
 @DisplayName("Test class: HttpProviderPlugin with e2e")
-public class HttpProviderPluginE2ETest {
+class HttpProviderPluginE2ETest {
 
   private HttpProviderPlugin provider;
 
   @BeforeEach
-  public void setup() {
+  void setup() {
     var jinjaService = new JinjaServiceTest();
     var httpService = new HttpServiceImpl(jinjaService);
     var taskEngine = new TaskEngineTest();

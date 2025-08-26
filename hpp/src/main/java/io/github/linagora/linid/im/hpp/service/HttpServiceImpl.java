@@ -54,6 +54,9 @@ public class HttpServiceImpl implements HttpService {
    */
   private final JinjaService jinjaService;
 
+  private static final String MISSING_OPTION = "error.plugin.default.missing.option";
+  private static final String OPTION = "option";
+
   /**
    * Default constructor.
    *
@@ -73,19 +76,19 @@ public class HttpServiceImpl implements HttpService {
     String baseUrl = configuration.getOption("baseUrl")
         .orElseThrow(() -> new ApiException(
             500,
-            I18nMessage.of("error.plugin.default.missing.option", Map.of("option", "baseUrl"))
+            I18nMessage.of(MISSING_OPTION, Map.of(OPTION, "baseUrl"))
         ));
     var headersMap = configuration.getOption("headers", new TypeReference<Map<String, String>>() {
     }).orElse(Map.of());
     String endpoint = Optional.ofNullable(endpointConfiguration.getUri())
         .orElseThrow(() -> new ApiException(
             500,
-            I18nMessage.of("error.plugin.default.missing.option", Map.of("option", String.format("access.%s.uri", action)))
+            I18nMessage.of(MISSING_OPTION, Map.of(OPTION, String.format("access.%s.uri", action)))
         ));
     String method = Optional.ofNullable(endpointConfiguration.getMethod())
         .orElseThrow(() -> new ApiException(
             500,
-            I18nMessage.of("error.plugin.default.missing.option", Map.of("option", String.format("access.%s.method", action)))
+            I18nMessage.of(MISSING_OPTION, Map.of(OPTION, String.format("access.%s.method", action)))
         ));
 
     String templatedBody = Optional.ofNullable(endpointConfiguration.getBody()).orElse("");
@@ -109,7 +112,7 @@ public class HttpServiceImpl implements HttpService {
     } else {
       throw new ApiException(500, I18nMessage.of(
           "error.plugin.default.invalid.option",
-          Map.of("option", String.format("access.%s.method", action), "value", method)
+          Map.of(OPTION, String.format("access.%s.method", action), "value", method)
       ));
     }
 

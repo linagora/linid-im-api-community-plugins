@@ -42,7 +42,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("Test class: ResponseToJsonTaskPlugin")
-public class ResponseToJsonTaskPluginTest {
+class ResponseToJsonTaskPluginTest {
 
   @Test
   @DisplayName("test supports: should return true on valid type")
@@ -55,7 +55,7 @@ public class ResponseToJsonTaskPluginTest {
 
   @Test
   @DisplayName("test execute: should set json in response")
-  public void testExecute() {
+  void testExecute() {
     var plugin = new ResponseToJsonTaskPlugin();
     var context = new TaskExecutionContext();
     context.put("response", "{\"test\":\"test\"}");
@@ -68,7 +68,7 @@ public class ResponseToJsonTaskPluginTest {
 
   @Test
   @DisplayName("test execute: should throw exception on invalid json")
-  public void testExecuteThrowException() {
+  void testExecuteThrowException() {
     var plugin = new ResponseToJsonTaskPlugin();
     var context = new TaskExecutionContext();
     context.put("response", "{\"test\":\"test\"");

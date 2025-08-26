@@ -23,6 +23,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'hpp/src/test/fake-http-server/package-lock.json'
 
       - name: Start fake HTTP server
         working-directory: hpp/src/test/fake-http-server

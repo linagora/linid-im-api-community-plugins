@@ -39,7 +39,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("Test class: RegexValidationPlugin")
-public class RegexValidationPluginTest {
+class RegexValidationPluginTest {
 
   @Test
   @DisplayName("test supports: should return true on valid type")

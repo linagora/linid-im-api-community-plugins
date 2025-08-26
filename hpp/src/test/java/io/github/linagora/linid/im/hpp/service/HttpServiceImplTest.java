@@ -42,11 +42,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 @DisplayName("Test class: HttpServiceImpl")
-public class HttpServiceImplTest {
+class HttpServiceImplTest {
 
   @Test
   @DisplayName("test request: should throw exception without options")
-  public void testRequestWithoutOptions() {
+  void testRequestWithoutOptions() {
     var jinjaService = Mockito.mock(JinjaService.class);
     Mockito.when(jinjaService.render(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn("test");
 
@@ -80,7 +80,7 @@ public class HttpServiceImplTest {
 
   @Test
   @DisplayName("test request: should throw exception with invalid method")
-  public void testRequestWithInvalidMethod() {
+  void testRequestWithInvalidMethod() {
     var jinjaService = Mockito.mock(JinjaService.class);
     Mockito.when(jinjaService.render(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn("test");
 

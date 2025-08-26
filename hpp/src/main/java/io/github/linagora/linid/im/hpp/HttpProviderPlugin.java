@@ -87,6 +87,8 @@ public class HttpProviderPlugin implements ProviderPlugin {
    */
   private final ObjectMapper mapper = new ObjectMapper();
 
+  private final static String RESPONSE = "response";
+
   /**
    * Default constructor.
    *
@@ -114,7 +116,7 @@ public class HttpProviderPlugin implements ProviderPlugin {
                               DynamicEntity dynamicEntity) {
     var endpointConfiguration = getEndpointConfiguration("create", dynamicEntity);
     String response = httpService.request(context, providerConfiguration, endpointConfiguration, "create", dynamicEntity);
-    context.put("response", response);
+    context.put(RESPONSE, response);
 
     taskEngine.execute(dynamicEntity, context, "beforeResponseMappingCreate");
     var entity = mappingEntity(context, endpointConfiguration, dynamicEntity);
@@ -131,7 +133,7 @@ public class HttpProviderPlugin implements ProviderPlugin {
     var endpointConfiguration = getEndpointConfiguration("update", dynamicEntity);
     context.put("id", id);
     String response = httpService.request(context, providerConfiguration, endpointConfiguration, "update", dynamicEntity);
-    context.put("response", response);
+    context.put(RESPONSE, response);
 
     taskEngine.execute(dynamicEntity, context, "beforeResponseMappingUpdate");
     var entity = mappingEntity(context, endpointConfiguration, dynamicEntity);
@@ -148,7 +150,7 @@ public class HttpProviderPlugin implements ProviderPlugin {
     var endpointConfiguration = getEndpointConfiguration("patch", dynamicEntity);
     context.put("id", id);
     String response = httpService.request(context, providerConfiguration, endpointConfiguration, "patch", dynamicEntity);
-    context.put("response", response);
+    context.put(RESPONSE, response);
 
     taskEngine.execute(dynamicEntity, context, "beforeResponseMappingPatch");
     var entity = mappingEntity(context, endpointConfiguration, dynamicEntity);
@@ -165,7 +167,7 @@ public class HttpProviderPlugin implements ProviderPlugin {
     var endpointConfiguration = getEndpointConfiguration("delete", dynamicEntity);
     context.put("id", id);
     String response = httpService.request(context, providerConfiguration, endpointConfiguration, "delete", dynamicEntity);
-    context.put("response", response);
+    context.put(RESPONSE, response);
 
     taskEngine.execute(dynamicEntity, context, "beforeResponseMappingDelete");
     boolean state = "true".equalsIgnoreCase(jinjaService.render(context, dynamicEntity, endpointConfiguration.getResult()));
@@ -186,7 +188,7 @@ public class HttpProviderPlugin implements ProviderPlugin {
     context.put("id", id);
     var endpointConfiguration = getEndpointConfiguration("findById", dynamicEntity);
     String response = httpService.request(context, providerConfiguration, endpointConfiguration, "findById", dynamicEntity);
-    context.put("response", response);
+    context.put(RESPONSE, response);
 
     taskEngine.execute(dynamicEntity, context, "beforeResponseMappingFindById");
     var entity = mappingEntity(context, endpointConfiguration, dynamicEntity);
@@ -203,7 +205,7 @@ public class HttpProviderPlugin implements ProviderPlugin {
                                      DynamicEntity dynamicEntity) {
     var endpointConfiguration = getEndpointConfiguration("findAll", dynamicEntity);
     String response = httpService.request(context, providerConfiguration, endpointConfiguration, "findAll", dynamicEntity);
-    context.put("response", response);
+    context.put(RESPONSE, response);
 
     taskEngine.execute(dynamicEntity, context, "beforeResponseMappingFindAll");
     Page<DynamicEntity> entities = mappingEntities(context, endpointConfiguration, dynamicEntity);

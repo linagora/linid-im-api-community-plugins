@@ -43,24 +43,20 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.util.LinkedMultiValueMap;
 
-@ExtendWith(MockitoExtension.class)
 @DisplayName("Test class:  MyPluginAuthorizationPlugin")
 class MyPluginAuthorizationPluginTest {
-
-  @InjectMocks
-  private MyPluginAuthorizationPlugin plugin;
 
   @Test
   @DisplayName("Test support: should return true only on MyPlugin")
   void testSupports() {
-    assertTrue(plugin.supports("MyPlugin"));
-    assertFalse(plugin.supports("Other"));
+    assertTrue(new MyPluginAuthorizationPlugin().supports("MyPlugin"));
+    assertFalse(new MyPluginAuthorizationPlugin().supports("Other"));
   }
 
   @Test
   @DisplayName("Test updateConfiguration: should not throw exception")
   void testUpdateConfiguration() {
-    assertDoesNotThrow(() -> new AllowAllAuthorizationPlugin().updateConfiguration(Mockito.mock(RootConfiguration.class)));
+    assertDoesNotThrow(() -> new MyPluginAuthorizationPlugin().updateConfiguration(Mockito.mock(RootConfiguration.class)));
   }
 
   @Test
@@ -71,9 +67,9 @@ class MyPluginAuthorizationPluginTest {
     var entity = new DynamicEntity();
     var filters = new LinkedMultiValueMap<String, String>();
 
-    assertDoesNotThrow(() -> new AllowAllAuthorizationPlugin().validateToken(request, context));
-    assertDoesNotThrow(() -> new AllowAllAuthorizationPlugin().isAuthorized(request, entity, "read", context));
-    assertDoesNotThrow(() -> new AllowAllAuthorizationPlugin().isAuthorized(request, entity, "123", "read", context));
-    assertDoesNotThrow(() -> new AllowAllAuthorizationPlugin().isAuthorized(request, entity, filters, "read", context));
+    assertDoesNotThrow(() -> new MyPluginAuthorizationPlugin().validateToken(request, context));
+    assertDoesNotThrow(() -> new MyPluginAuthorizationPlugin().isAuthorized(request, entity, "read", context));
+    assertDoesNotThrow(() -> new MyPluginAuthorizationPlugin().isAuthorized(request, entity, "123", "read", context));
+    assertDoesNotThrow(() -> new MyPluginAuthorizationPlugin().isAuthorized(request, entity, filters, "read", context));
   }
 }

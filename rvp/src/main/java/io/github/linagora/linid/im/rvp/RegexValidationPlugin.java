@@ -44,6 +44,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class RegexValidationPlugin implements ValidationPlugin {
 
+    private static final String PATTERN = "pattern";
+
   @Override
   public boolean supports(@NonNull String type) {
     return "regex".equals(type);
@@ -51,10 +53,10 @@ public class RegexValidationPlugin implements ValidationPlugin {
 
   @Override
   public Optional<I18nMessage> validate(ValidationConfiguration configuration, Object value) {
-    var regex = configuration.getOption("pattern")
+    var regex = configuration.getOption(PATTERN)
         .orElseThrow(() -> new ApiException(
             500,
-            I18nMessage.of("error.plugin.default.missing.option", Map.of("option", "pattern"))
+            I18nMessage.of("error.plugin.default.missing.option", Map.of("option", PATTERN))
         ));
     boolean insensitive = configuration.getOption("insensitive", Boolean.class)
         .orElse(false);
@@ -72,7 +74,7 @@ public class RegexValidationPlugin implements ValidationPlugin {
       throw new ApiException(
           500,
           I18nMessage.of("error.plugin.default.invalid.option", Map.of(
-              "option", "pattern",
+              "option", PATTERN,
               "value", regex
           ))
       );
@@ -84,7 +86,7 @@ public class RegexValidationPlugin implements ValidationPlugin {
 
     return Optional.of(I18nMessage.of(
         "error.plugin.regexValidation.invalid.value",
-        Map.of("pattern", regex,  "value", value)
+        Map.of(PATTERN, regex,  "value", value)
     ));
   }
 }

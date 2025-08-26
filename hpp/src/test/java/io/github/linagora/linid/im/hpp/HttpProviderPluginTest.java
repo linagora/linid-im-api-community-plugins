@@ -37,7 +37,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("Test class: HttpProviderPlugin")
-public class HttpProviderPluginTest {
+class HttpProviderPluginTest {
 
   @Test
   @DisplayName("test supports: should return true on valid type")
@@ -50,7 +50,7 @@ public class HttpProviderPluginTest {
 
   @Test
   @DisplayName("test getEndpointConfiguration: should always return a configuration")
-  public void testGetEndpointConfiguration() {
+  void testGetEndpointConfiguration() {
     var plugin = new HttpProviderPlugin(null, null, null);
 
     var entity = new DynamicEntity();

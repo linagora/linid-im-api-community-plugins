@@ -150,7 +150,7 @@ class ContextMapperTaskPluginTest {
 
   @Test
   @DisplayName("test execute: should add, map et remove")
-  public void testExecuteAll() {
+  void testExecuteAll() {
     var jinjaService = Mockito.mock(JinjaService.class);
     Mockito.when(jinjaService.render(Mockito.any(), Mockito.any())).thenReturn("newValue");
     var plugin = new ContextMapperTaskPlugin(jinjaService);

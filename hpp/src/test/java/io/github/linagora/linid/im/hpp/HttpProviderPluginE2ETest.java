@@ -392,6 +392,39 @@ class HttpProviderPluginE2ETest {
         .create(context, providerConfiguration, entity));
 
     assertEquals("hpp.error400", exception.getError().key());
+    assertEquals(400, exception.getStatusCode());
+  }
+
+  @Test
+  @DisplayName("Test request: should throw exception on 404")
+  void testExceptionOn404() {
+    var entity = new DynamicEntity();
+    var context = new TaskExecutionContext();
+    var providerConfiguration = new ProviderConfiguration();
+    var entityConfiguration = new EntityConfiguration();
+    var attributes = new HashMap<String, Object>();
+    var access = new HashMap<String, Object>();
+    var createAccess = new HashMap<String, Object>();
+
+    providerConfiguration.addOption("baseUrl", "http://localhost:3000");
+    providerConfiguration.addOption("headers", Map.of("Content-Type", "application/json"));
+
+    attributes.put("id", "2");
+
+    createAccess.put("uri", "/v1/test_api/404");
+    createAccess.put("method", "GET");
+
+    access.put("create", createAccess);
+
+    entityConfiguration.setAccess(access);
+    entity.setConfiguration(entityConfiguration);
+    entity.setAttributes(attributes);
+
+    var exception = assertThrows(ApiException.class, () -> provider
+        .create(context, providerConfiguration, entity));
+
+    assertEquals("hpp.error404", exception.getError().key());
+    assertEquals(404, exception.getStatusCode());
   }
 
   @Test

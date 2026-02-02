@@ -11,6 +11,13 @@ app.get('/v1/test_api/400', (httpRequest, httpResponse) => {
         });
 });
 
+app.get('/v1/test_api/404', (httpRequest, httpResponse) => {
+    httpResponse.status(404)
+        .send({
+            error: "true",
+        });
+});
+
 app.get('/v1/test_api/500', (httpRequest, httpResponse) => {
     httpResponse.status(500)
         .send({

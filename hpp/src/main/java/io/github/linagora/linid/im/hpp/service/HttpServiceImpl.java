@@ -124,7 +124,7 @@ public class HttpServiceImpl implements HttpService {
             clientResponse -> clientResponse.bodyToMono(String.class)
                 .map(errorBody -> new ApiException(
                     clientResponse.statusCode().value(),
-                    I18nMessage.of("hpp.error400"),
+                    I18nMessage.of(String.format("hpp.error%d", clientResponse.statusCode().value())),
                     Map.of("body", errorBody)
                 ))
         )

@@ -11,6 +11,7 @@
     <module>cmtp</module>
     <module>rvp</module>
     <module>hpp</module>
+    <module>rqvp</module>
   </modules>
   <licenses>
     <license>

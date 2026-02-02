@@ -6,6 +6,28 @@ Each plugin is maintained in a dedicated subdirectory and follows the same struc
 
 ---
 
+
+## **🧪 Current Available Plugins**
+
+### **📦 Task plugins**
+
+| Name    | Description                                                                  |
+| ------- | ---------------------------------------------------------------------------- |
+| `cmtp`  | Task plugin to copy and transform context values using Jinjava templates.    |
+
+### **📦 Provider plugins**
+
+| Name    | Description                                                                  |
+| ------- | ---------------------------------------------------------------------------- |
+| `hpp`   | Provider plugin to interact with configurable HTTP REST APIs (CRUD, mapping).|
+
+### **🧩 Validation Plugins**
+
+| Name     | Description                                                                 |
+| -------- | ----------------------------------------------------------------------------|
+| `rvp`    | Validation plugin to ensure a value matches a regular expression pattern.   |
+| `rqvp`   | Validation plugin to ensure a value is not empty.                           |
+
 ## 📦 Structure
 
 ```

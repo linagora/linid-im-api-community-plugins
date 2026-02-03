@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- update copyright headers
 - reject error with valid message
 - resolve sonar issues
 - fix checkstyle errors

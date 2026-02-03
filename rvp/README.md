@@ -33,6 +33,21 @@ This will validate that the value contains 3 to 16 characters consisting of lowe
 
 This will validate values against the regex `^hello.*world$`, ignoring case (e.g., `Hello my World`, `hello WORLD`, etc.).
 
+### Full Example with Entity Attributes
+
+```yaml
+entities:
+  - name: user
+    attributes:
+      - name: id
+        type: UUID
+        validations:
+          - name: idRegexValidation
+            type: regex
+            pattern: ^[a-f0-9-]{36}$
+            insensitive: false
+```
+
 ### Configuration Fields
 
 | Key           | Required | Description                                                                  |

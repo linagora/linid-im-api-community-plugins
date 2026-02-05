@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- handle null value in validate method
 - add minimal example for regex plugin
 - update copyright headers
 - resolve sonar issues

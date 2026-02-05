@@ -9,7 +9,7 @@
   </parent>
   <groupId>io.github.linagora.linid.im</groupId>
   <artifactId>rvp</artifactId>
-  <version>0.2.0</version>
+  <version>0.2.1</version>
   <name>regex-validation</name>
   <description>Plugin to validate field with regex</description>
   <url>https://github.com/linagora/linid-im-api-community-plugins</url>

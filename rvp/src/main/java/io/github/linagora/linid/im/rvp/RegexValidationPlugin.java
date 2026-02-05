@@ -80,13 +80,13 @@ public class RegexValidationPlugin implements ValidationPlugin {
       );
     }
 
-    if (pattern.matcher(value.toString()).matches()) {
-      return Optional.empty();
+    if (value == null || !pattern.matcher(value.toString()).matches()) {
+      return Optional.of(I18nMessage.of(
+          "error.plugin.regexValidation.invalid.value",
+          Map.of(PATTERN, regex, "value", String.valueOf(value))
+      ));
     }
 
-    return Optional.of(I18nMessage.of(
-        "error.plugin.regexValidation.invalid.value",
-        Map.of(PATTERN, regex,  "value", value)
-    ));
+    return Optional.empty();
   }
 }

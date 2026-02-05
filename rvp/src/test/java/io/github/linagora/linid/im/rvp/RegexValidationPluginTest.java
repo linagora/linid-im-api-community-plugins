@@ -121,6 +121,20 @@ class RegexValidationPluginTest {
   }
 
   @Test
+  @DisplayName("test validate: should return message on null value")
+  void testValidateNullValue() {
+    var plugin = new RegexValidationPlugin();
+    var configuration = new ValidationConfiguration();
+    configuration.addOption("pattern", "[a-z]{1}");
+
+    var error = plugin.validate(configuration, null);
+
+    assertNotNull(error);
+    assertTrue(error.isPresent());
+    assertEquals("error.plugin.regexValidation.invalid.value", error.get().key());
+  }
+
+  @Test
   @DisplayName("test validate: should not return message on insensitive valid value")
   void testValidateInsensitiveValidValue() {
     var plugin = new RegexValidationPlugin();

@@ -23,10 +23,11 @@ Each plugin is maintained in a dedicated subdirectory and follows the same struc
 
 ### **🧩 Validation Plugins**
 
-| Name     | Description                                                                 |
-| -------- | ----------------------------------------------------------------------------|
-| `rvp`    | Validation plugin to ensure a value matches a regular expression pattern.   |
-| `rqvp`   | Validation plugin to ensure a value is not empty.                           |
+| Name   | Description                                                                         |
+| ------ | ----------------------------------------------------------------------------------- |
+| `rvp`  | Validation plugin to ensure a value matches a regular expression pattern.           |
+| `rqvp` | Validation plugin to ensure a value is not empty.                                   |
+| `lvp`  | Validation plugin to ensure a value belongs to a predefined list of allowed values. |
 
 ## 📦 Structure
 

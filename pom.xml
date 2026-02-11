@@ -12,6 +12,7 @@
     <module>rvp</module>
     <module>hpp</module>
     <module>rqvp</module>
+    <module>lvp</module>
   </modules>
   <licenses>
     <license>

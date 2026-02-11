@@ -1,3 +1,3 @@
 {
-    "error.plugin.regexValidation.invalid.value": "La valeur ne correspond pas au modèle requis."
+    "error.plugin.regexValidation.invalid.value": "La valeur '{{value}}' n'est pas autorisée. Attendu : {{allowedValues}}."
 }

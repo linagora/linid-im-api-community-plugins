@@ -20,4 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - resolve sonar issues
 - fix checkstyle errors
 
+### Changed
+
+- fix paths and test coverage for pull request workflow
+
 

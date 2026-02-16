@@ -2,17 +2,12 @@
 
 ## Git conventions
 
-### 💬 Branch naming
-Voici une version enrichie pour prendre en compte **tous les types de branches** que tu mentionnes, tout en gardant une structure claire et professionnelle :
-
----
-
-## 🌿 Branch Naming Convention
+### 🌿 Branch Naming Convention
 
 All branches must follow one of the predefined naming patterns listed below:
 
 | Type        | Pattern                           | Example                        |
-| ----------- | --------------------------------- |--------------------------------|
+| ----------- | --------------------------------- | ------------------------------ |
 | Main        | `main` or `dev`                   | `main`                         |
 | Feature     | `feature/<short-description>`     | `feature/kafka_integration`    |
 | Bugfix      | `bugfix/<short-description>`      | `bugfix/null_pointer_handling` |
@@ -24,14 +19,11 @@ All branches must follow one of the predefined naming patterns listed below:
 
 ### ✅ Rules
 
-* Use only **lowercase letters**, **numbers**, **dashes (`-`)**, **underscores (`_`)**, and **dots (`.`)**.
-* Branch names must be **descriptive** and **concise**.
-* Avoid generic names like `fix`, `update`, or `new-feature`.
+- Use only **lowercase letters**, **numbers**, **dashes (`-`)**, **underscores (`_`)**, and **dots (`.`)**.
+- Branch names must be **descriptive** and **concise**.
+- Avoid generic names like `fix`, `update`, or `new-feature`.
 
 ---
-
-Would you like a Git hook or CI check to enforce this convention automatically?
-
 
 ### 💬 Commit message format
 
@@ -143,14 +135,14 @@ checkstyle/google-java-checkstyle.xml
 
 It includes:
 
-* Enforced Google Java Style conventions
-* Mandatory Javadoc for types, methods, and fields
-* Naming conventions for classes, methods, variables, and constants
-* Rules for whitespace, indentation, and brace placement
-* Bans on wildcard and unused imports
-* Limits on line length, method size, and parameter count
-* Detection of common pitfalls (e.g., magic numbers, empty blocks)
-* Required `package-info.java` for each package
+- Enforced Google Java Style conventions
+- Mandatory Javadoc for types, methods, and fields
+- Naming conventions for classes, methods, variables, and constants
+- Rules for whitespace, indentation, and brace placement
+- Bans on wildcard and unused imports
+- Limits on line length, method size, and parameter count
+- Detection of common pitfalls (e.g., magic numbers, empty blocks)
+- Required `package-info.java` for each package
 
 You can explore and customize these rules in the configuration file.
 
@@ -243,10 +235,10 @@ Development releases are automatically managed
 using [Semantic Release](https://github.com/Zorin95670/semantic-version).
 When a merge is performed into the `main` branch:
 
-* Semantic Release calculates the next version based on commit messages.
-* The pom.xml is updated with this version.
-* The changelog is generated.
-* The version bump and changelog are committed.
-* A new Git tag is created.
+- Semantic Release calculates the next version based on commit messages.
+- The pom.xml is updated with this version.
+- The changelog is generated.
+- The version bump and changelog are committed.
+- A new Git tag is created.
 
 ⚠️ No manual intervention is required during this process.

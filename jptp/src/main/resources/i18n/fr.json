@@ -1,0 +1,4 @@
+{
+  "jptp.error.json.parsing": "Impossible de parser le JSON depuis la clé de contexte '{{source}}'.",
+  "jptp.error.source.unknown": "La clé de contexte '{{source}}' est inconnue."
+}

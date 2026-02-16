@@ -6,20 +6,20 @@ Each plugin is maintained in a dedicated subdirectory and follows the same struc
 
 ---
 
-
 ## **🧪 Current Available Plugins**
 
 ### **📦 Task plugins**
 
-| Name    | Description                                                                  |
-| ------- | ---------------------------------------------------------------------------- |
-| `cmtp`  | Task plugin to copy and transform context values using Jinjava templates.    |
+| Name   | Description                                                               |
+| ------ | ------------------------------------------------------------------------- |
+| `cmtp` | Task plugin to copy and transform context values using Jinjava templates. |
+| `jptp` | Task plugin to parse a JSON string from the context.                      |
 
 ### **📦 Provider plugins**
 
-| Name    | Description                                                                  |
-| ------- | ---------------------------------------------------------------------------- |
-| `hpp`   | Provider plugin to interact with configurable HTTP REST APIs (CRUD, mapping).|
+| Name  | Description                                                                   |
+| ----- | ----------------------------------------------------------------------------- |
+| `hpp` | Provider plugin to interact with configurable HTTP REST APIs (CRUD, mapping). |
 
 ### **🧩 Validation Plugins**
 
@@ -48,11 +48,10 @@ This repository uses a **centralized release process** powered by [semantic-rele
 
 ### ✅ How it works
 
-* On every push to the `main` branch, the workflow:
-
-    1. Analyzes recent commits.
-    2. Extracts the plugin names based on commit messages (e.g., `feat(plugin-a): ...`).
-    3. Triggers a release **only for affected plugins**.
+- On every push to the `main` branch, the workflow:
+  1. Analyzes recent commits.
+  2. Extracts the plugin names based on commit messages (e.g., `feat(plugin-a): ...`).
+  3. Triggers a release **only for affected plugins**.
 
 ### ✏️ Commit Convention
 
@@ -100,13 +99,13 @@ This repository uses a modular GitHub Actions setup:
 
 Every pull request is validated by a common workflow that performs:
 
-* ✅ **Branch name validation**
+- ✅ **Branch name validation**
   Branches must follow predefined naming patterns (e.g., `feature/<desc>`, `bugfix/<desc>`, `release/<version>`).
 
-* ✅ **Commit message validation**
+- ✅ **Commit message validation**
   Commits must follow the [Conventional Commits](https://www.conventionalcommits.org) format, including plugin scoping (`feat(plugin-x): ...`).
 
-* ✅ **Code style checks**
+- ✅ **Code style checks**
   The repository enforces a common `checkstyle` configuration shared across all plugins.
 
 These checks are run automatically on every pull request.
@@ -148,9 +147,9 @@ You can copy and adapt this per plugin.
 
 ## 🛠️ Development Tips
 
-* Ensure that each plugin is **independent and buildable with Maven**.
-* Use standard Maven conventions inside each plugin.
-* Keep plugin-specific logic scoped to its folder.
+- Ensure that each plugin is **independent and buildable with Maven**.
+- Use standard Maven conventions inside each plugin.
+- Keep plugin-specific logic scoped to its folder.
 
 ---
 

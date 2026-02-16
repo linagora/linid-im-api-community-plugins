@@ -1,0 +1,4 @@
+{
+  "jptp.error.json.parsing": "Failed to parse JSON from context key '{{source}}'.",
+  "jptp.error.source.unknown": "Context key '{{source}}' is unknown."
+}

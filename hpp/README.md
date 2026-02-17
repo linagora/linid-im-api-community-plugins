@@ -6,10 +6,16 @@ The `HttpProviderPlugin` is a provider plugin designed to interact with configur
 
 Use this plugin when you need to:
 
-* Integrate a data source accessible via HTTP REST API.
-* Dynamically configure endpoints, HTTP methods, and request bodies.
-* Transform HTTP responses into dynamic entities.
-* Insert pre- and post-response mapping phases for custom processing.
+- Integrate a data source accessible via HTTP REST API.
+- Dynamically configure endpoints, HTTP methods, and request bodies.
+- Insert pre- and post-response mapping phases for custom processing.
+
+## 🔄 Transforming HTTP Responses to JSON
+
+The `HttpProviderPlugin` does not automatically transform raw HTTP responses into JSON objects.
+If your API returns a raw response that must be parsed before entity mapping, you should use the [`JsonParsingTaskPlugin`](../jptp/README.md).
+
+For configuration details, see the [JsonParsingTaskPlugin documentation](../jptp/README.md).
 
 ## 🔧 Configuration
 
@@ -27,17 +33,19 @@ entities:
     route: users
     disabledRoutes: ['patch', 'findAll']
     tasks:
-       - type: response-to-json
-         phases: [
-            "beforeResponseMappingCreate",
-            "beforeResponseMappingUpdate",
+      - type: json-parsing
+        source: response
+        destination: response
+        phases: [
+            'beforeResponseMappingCreate',
+            'beforeResponseMappingUpdate',
             # "beforeResponseMappingPatch", -> this phase is unused
-            "beforeResponseMappingDelete",
-            "beforeResponseMappingFindById",
+            'beforeResponseMappingDelete',
+            'beforeResponseMappingFindById',
             # "beforeResponseMappingFindAll" -> this phase is unused
-         ]
+          ]
     access:
-      create: 
+      create:
         uri: /api/users
         method: POST
         body: >
@@ -45,7 +53,7 @@ entities:
             "name": "{{ entity.name }}"
           }
         entityMapping:
-          id: {{ response.id }}
+          id: { { response.id } }
       delete:
         uri: /api/users/{{ entity.id }}
         method: DELETE
@@ -54,7 +62,7 @@ entities:
         uri: /api/users/{{ entity.id }}
         method: GET
         entityMapping:
-           id: {{ response.id }}
+          id: { { response.id } }
       update:
         uri: /api/users/{{ entity.id }}
         method: PUT
@@ -63,7 +71,7 @@ entities:
             "name": "{{ entity.name }}"
           }
         entityMapping:
-           id: {{ response.id }}
+          id: { { response.id } }
 ```
 
 ### Full Example with Pagination and Mapping
@@ -75,7 +83,9 @@ entities:
     route: users
     disabledRoutes: ['create', 'update', 'patch', 'delete', 'findById']
     tasks:
-       - type: response-to-json
+       - type: json-parsing
+         source: response
+         destination: response
          phases: ["beforeResponseMappingFindAll"]
     access:
       findAll:
@@ -93,34 +103,30 @@ entities:
 
 | Key                                   | Required | Description                                                                                  |
 | ------------------------------------- | -------- | -------------------------------------------------------------------------------------------- |
-| `baseUrl`                             | ✅        | Base URL of the HTTP API                                                                     |
-| `headers`                             | ❌        | Optional HTTP headers (e.g., `Content-Type`, `Authorization`)                                |
-| `disabledRoutes`                      | ❌        | List of disabled actions for the entity (e.g., `patch`, `findAll`)                           |
-| `access`                              | ❌        | Specific configuration for each CRUD action (`create`, `update`, `delete`, `findById`, etc.) |
-| `uri`                                 | ✅        | Endpoint URI (supports Jinja templating)                                                     |
-| `method`                              | ✅        | HTTP method (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`)                                        |
-| `body`                                | ❌        | HTTP request body (supports Jinja templating)                                                |
-| `entityMapping`                       | ❌        | Maps fields from the HTTP response to the dynamic entity                                     |
-| `result`                              | ❌        | Expression evaluated to verify success (e.g., for `delete`)                                  |
-| `page`, `size`, `total`, `itemsCount` | ❌        | Pagination info for `findAll`; mapping can use `index` for iterating items.                  |
+| `baseUrl`                             | ✅       | Base URL of the HTTP API                                                                     |
+| `headers`                             | ❌       | Optional HTTP headers (e.g., `Content-Type`, `Authorization`)                                |
+| `disabledRoutes`                      | ❌       | List of disabled actions for the entity (e.g., `patch`, `findAll`)                           |
+| `access`                              | ❌       | Specific configuration for each CRUD action (`create`, `update`, `delete`, `findById`, etc.) |
+| `uri`                                 | ✅       | Endpoint URI (supports Jinja templating)                                                     |
+| `method`                              | ✅       | HTTP method (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`)                                        |
+| `body`                                | ❌       | HTTP request body (supports Jinja templating)                                                |
+| `entityMapping`                       | ❌       | Maps fields from the HTTP response to the dynamic entity                                     |
+| `result`                              | ❌       | Expression evaluated to verify success (e.g., for `delete`)                                  |
+| `page`, `size`, `total`, `itemsCount` | ❌       | Pagination info for `findAll`; mapping can use `index` for iterating items.                  |
 
 ## 🛠 Behavior
 
-* For each CRUD action, the plugin executes two lifecycle phases **before** and **after** the response mapping:
+- For each CRUD action, the plugin executes two lifecycle phases **before** and **after** the response mapping:
+  - `beforeResponseMappingCreate` / `afterResponseMappingCreate`
+  - `beforeResponseMappingUpdate` / `afterResponseMappingUpdate`
+  - `beforeResponseMappingPatch` / `afterResponseMappingPatch`
+  - `beforeResponseMappingDelete` / `afterResponseMappingDelete`
+  - `beforeResponseMappingFindById` / `afterResponseMappingFindById`
+  - `beforeResponseMappingFindAll` / `afterResponseMappingFindAll`
 
-   * `beforeResponseMappingCreate` / `afterResponseMappingCreate`
-   * `beforeResponseMappingUpdate` / `afterResponseMappingUpdate`
-   * `beforeResponseMappingPatch` / `afterResponseMappingPatch`
-   * `beforeResponseMappingDelete` / `afterResponseMappingDelete`
-   * `beforeResponseMappingFindById` / `afterResponseMappingFindById`
-   * `beforeResponseMappingFindAll` / `afterResponseMappingFindAll`
+- These phases allow inserting custom logic at precise points during entity processing.
 
-* These phases allow inserting custom logic at precise points during entity processing.
-
-* The plugin consists of two types:
-
-   * **Provider plugin**: handles HTTP calls and entity mapping.
-   * **Task plugin**: can run during lifecycle phases to perform operations like converting HTTP responses to JSON.
+- The plugin relies on external task plugins (like jptp's `json-parsing`) that can run during lifecycle phases to perform operations such as converting HTTP responses to JSON.
 
 ### Example of a Task plugin configuration
 
@@ -131,25 +137,28 @@ entities:
     route: users
     disabledRoutes: ['patch', 'findAll']
     tasks:
-      - type: response-to-json
-        phases: [
-          "beforeResponseMappingCreate",
-          "beforeResponseMappingUpdate",
-          "beforeResponseMappingPatch",
-          "beforeResponseMappingDelete",
-          "beforeResponseMappingFindById",
-          "beforeResponseMappingFindAll"
-        ]
+      - type: json-parsing
+        source: response
+        destination: response
+        phases:
+          [
+            'beforeResponseMappingCreate',
+            'beforeResponseMappingUpdate',
+            'beforeResponseMappingPatch',
+            'beforeResponseMappingDelete',
+            'beforeResponseMappingFindById',
+            'beforeResponseMappingFindAll',
+          ]
 ```
 
-This `response-to-json` task plugin converts raw HTTP responses into JSON before entity mapping.
+This `json-parsing` task (from the jptp plugin) converts raw HTTP responses into JSON before entity mapping. The `source` and `destination` options specify which context key to read from and write to.
 
 ## 🧷 Important Notes
 
-* Templating uses Jinja (via `JinjaService`) to dynamically inject entity and response values.
-* If a route is declared in `disabledRoutes`, the plugin ignores any corresponding `access` configuration.
-* The `findAll` entity mapping must always use an `index` parameter to iterate over the response items.
-* The plugin naturally integrates with the task engine to allow customized processing on responses.
+- Templating uses Jinja (via `JinjaService`) to dynamically inject entity and response values.
+- If a route is declared in `disabledRoutes`, the plugin ignores any corresponding `access` configuration.
+- The `findAll` entity mapping must always use an `index` parameter to iterate over the response items.
+- The plugin naturally integrates with the task engine to allow customized processing on responses.
 
 ---
 

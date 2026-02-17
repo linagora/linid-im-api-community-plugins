@@ -1,0 +1,62 @@
+name: 'Check Pull Request for plugin: dynamic list'
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'dlvp/**'
+
+jobs:
+  tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 21 for x64
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          architecture: x64
+
+      - name: Set up Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'dlvp/src/test/fake-http-server/package-lock.json'
+
+      - name: Start fake HTTP server
+        working-directory: dlvp/src/test/fake-http-server
+        run: |
+          npm install
+          npm run start &
+          sleep 5
+
+      - name: Install Pandoc
+        run: sudo apt-get update && sudo apt-get install -y pandoc
+
+      - name: Install jptp dependency
+        run: mvn -ntp -pl jptp -am install -DskipTests -Dgpg.skip
+
+      - name: Execute unit tests
+        run: mvn -ntp -pl dlvp test
+
+      - name: Execute mutation tests
+        run: mvn -ntp -pl dlvp org.pitest:pitest-maven:mutationCoverage
+
+      - name: Extract summary from pitest
+        run: |
+          echo "<html><head></head><body><h1>Pit Test Coverage Report: dynamic-list</h1><h3>Project Summary</h3>" > pitest.html
+          perl -0777 -ne 'print "$1\n" if /(<table>.*?<\/table>)/s' dlvp/target/pit-reports/index.html >> pitest.html
+          echo "</body></html>" >> pitest.html
+
+      - name: Convert pitest report to markdown
+        run: pandoc --from html --to markdown_github --no-highlight pitest.html
+
+      - name: Post comment
+        uses: luukkemp/pr-comment@2024.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          path: pitest.html

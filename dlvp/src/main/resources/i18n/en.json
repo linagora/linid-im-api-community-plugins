@@ -1,0 +1,6 @@
+{
+  "error.plugin.dynamicListValidation.invalid.value": "The value '{value}' is not in the list of allowed values.",
+  "dlvp.error.external.api": "External API returned an error.",
+  "dlvp.error.external.api.unavailable": "External API is unavailable.",
+  "dlvp.error.json": "Received invalid JSON from external API response."
+}

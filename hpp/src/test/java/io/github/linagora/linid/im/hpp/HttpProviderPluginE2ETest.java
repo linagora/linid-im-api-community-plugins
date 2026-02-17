@@ -31,19 +31,19 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hubspot.jinjava.Jinjava;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.plugin.config.JinjaService;
 import io.github.linagora.linid.im.corelib.plugin.config.dto.EntityConfiguration;
 import io.github.linagora.linid.im.corelib.plugin.config.dto.ProviderConfiguration;
+import io.github.linagora.linid.im.corelib.plugin.config.dto.TaskConfiguration;
 import io.github.linagora.linid.im.corelib.plugin.entity.DynamicEntity;
 import io.github.linagora.linid.im.corelib.plugin.task.TaskEngine;
 import io.github.linagora.linid.im.corelib.plugin.task.TaskExecutionContext;
 import io.github.linagora.linid.im.hpp.service.HttpServiceImpl;
+import io.github.linagora.linid.im.jptp.JsonParsingTaskPlugin;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -62,6 +62,22 @@ class HttpProviderPluginE2ETest {
     var httpService = new HttpServiceImpl(jinjaService);
     var taskEngine = new TaskEngineTest();
     provider = new HttpProviderPlugin(taskEngine, httpService, jinjaService);
+  }
+
+  private TaskConfiguration buildJsonParsingTask() {
+    var task = new TaskConfiguration();
+    task.setType("json-parsing");
+    task.addOption("source", "response");
+    task.addOption("destination", "response");
+    task.setPhases(List.of(
+        "beforeResponseMappingCreate",
+        "beforeResponseMappingUpdate",
+        "beforeResponseMappingPatch",
+        "beforeResponseMappingDelete",
+        "beforeResponseMappingFindById",
+        "beforeResponseMappingFindAll"
+    ));
+    return task;
   }
 
   @Test
@@ -96,6 +112,7 @@ class HttpProviderPluginE2ETest {
     access.put("create", createAccess);
 
     entityConfiguration.setAccess(access);
+    entityConfiguration.setTasks(List.of(buildJsonParsingTask()));
     entity.setConfiguration(entityConfiguration);
     entity.setAttributes(attributes);
 
@@ -147,6 +164,7 @@ class HttpProviderPluginE2ETest {
     access.put("findAll", findAllAccess);
 
     entityConfiguration.setAccess(access);
+    entityConfiguration.setTasks(List.of(buildJsonParsingTask()));
     entity.setConfiguration(entityConfiguration);
     entity.setAttributes(attributes);
 
@@ -199,6 +217,7 @@ class HttpProviderPluginE2ETest {
     access.put("findById", findByIdAccess);
 
     entityConfiguration.setAccess(access);
+    entityConfiguration.setTasks(List.of(buildJsonParsingTask()));
     entity.setConfiguration(entityConfiguration);
     entity.setAttributes(attributes);
 
@@ -235,6 +254,7 @@ class HttpProviderPluginE2ETest {
     access.put("delete", deleteAccess);
 
     entityConfiguration.setAccess(access);
+    entityConfiguration.setTasks(List.of(buildJsonParsingTask()));
     entity.setConfiguration(entityConfiguration);
     entity.setAttributes(attributes);
 
@@ -264,6 +284,7 @@ class HttpProviderPluginE2ETest {
     access.put("delete", deleteAccess);
 
     entityConfiguration.setAccess(access);
+    entityConfiguration.setTasks(List.of(buildJsonParsingTask()));
     entity.setConfiguration(entityConfiguration);
     entity.setAttributes(attributes);
 
@@ -303,6 +324,7 @@ class HttpProviderPluginE2ETest {
     access.put("patch", patchAccess);
 
     entityConfiguration.setAccess(access);
+    entityConfiguration.setTasks(List.of(buildJsonParsingTask()));
     entity.setConfiguration(entityConfiguration);
     entity.setAttributes(attributes);
 
@@ -348,6 +370,7 @@ class HttpProviderPluginE2ETest {
     access.put("update", updateAccess);
 
     entityConfiguration.setAccess(access);
+    entityConfiguration.setTasks(List.of(buildJsonParsingTask()));
     entity.setConfiguration(entityConfiguration);
     entity.setAttributes(attributes);
 
@@ -456,7 +479,7 @@ class HttpProviderPluginE2ETest {
     assertEquals("hpp.error500", exception.getError().key());
   }
 
-  class JinjaServiceTest implements JinjaService {
+  static class JinjaServiceTest implements JinjaService {
 
     @Override
     public String render(TaskExecutionContext taskContext, String template) {
@@ -480,20 +503,23 @@ class HttpProviderPluginE2ETest {
     }
   }
 
-  class TaskEngineTest implements TaskEngine {
+  static class TaskEngineTest implements TaskEngine {
+
+    private final JsonParsingTaskPlugin jsonParsingPlugin = new JsonParsingTaskPlugin();
+
     @Override
     public void execute(DynamicEntity dynamicEntity, TaskExecutionContext context, String phase) {
-      if (phase.startsWith("beforeResponseMapping")) {
-        String json = (String) context.get("response");
-        Map<String, Object> response = null;
-        try {
-          response = new ObjectMapper().readValue(json, new TypeReference<Map<String, Object>>() {
-          });
-        } catch (JsonProcessingException e) {
-          throw new RuntimeException(e);
-        }
-        context.put("response", response);
+      if (dynamicEntity.getConfiguration() == null) {
+        return;
       }
+      dynamicEntity.getConfiguration().getTasks()
+          .stream()
+          .filter(task -> task.getPhases().contains(phase))
+          .forEach(task -> {
+            if (jsonParsingPlugin.supports(task.getType())) {
+              jsonParsingPlugin.execute(task, dynamicEntity, context);
+            }
+          });
     }
   }
 }

@@ -38,6 +38,12 @@
   </properties>
   <dependencies>
     <dependency>
+      <groupId>io.github.linagora.linid.im</groupId>
+      <artifactId>jptp</artifactId>
+      <version>0.1.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>com.hubspot.jinjava</groupId>
       <artifactId>jinjava</artifactId>
       <version>2.8.0</version>

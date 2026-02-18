@@ -18,4 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - resolve sonar issues
 - fix checkstyle errors
 
+### Changed
+
+- install jptp dependency before running tests
+- replace response-to-json task with json-parsing from jptp
+
 

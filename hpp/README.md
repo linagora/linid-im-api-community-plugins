@@ -40,7 +40,6 @@ entities:
             'beforeResponseMappingCreate',
             'beforeResponseMappingUpdate',
             # "beforeResponseMappingPatch", -> this phase is unused
-            'beforeResponseMappingDelete',
             'beforeResponseMappingFindById',
             # "beforeResponseMappingFindAll" -> this phase is unused
           ]
@@ -120,7 +119,6 @@ entities:
   - `beforeResponseMappingCreate` / `afterResponseMappingCreate`
   - `beforeResponseMappingUpdate` / `afterResponseMappingUpdate`
   - `beforeResponseMappingPatch` / `afterResponseMappingPatch`
-  - `beforeResponseMappingDelete` / `afterResponseMappingDelete`
   - `beforeResponseMappingFindById` / `afterResponseMappingFindById`
   - `beforeResponseMappingFindAll` / `afterResponseMappingFindAll`
 
@@ -145,7 +143,6 @@ entities:
             'beforeResponseMappingCreate',
             'beforeResponseMappingUpdate',
             'beforeResponseMappingPatch',
-            'beforeResponseMappingDelete',
             'beforeResponseMappingFindById',
             'beforeResponseMappingFindAll',
           ]

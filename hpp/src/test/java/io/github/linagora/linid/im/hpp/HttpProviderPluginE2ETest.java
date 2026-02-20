@@ -73,7 +73,6 @@ class HttpProviderPluginE2ETest {
         "beforeResponseMappingCreate",
         "beforeResponseMappingUpdate",
         "beforeResponseMappingPatch",
-        "beforeResponseMappingDelete",
         "beforeResponseMappingFindById",
         "beforeResponseMappingFindAll"
     ));
@@ -261,37 +260,6 @@ class HttpProviderPluginE2ETest {
     var result = provider.delete(context, providerConfiguration, "1", entity);
 
     assertTrue(result);
-  }
-
-  @Test
-  @DisplayName("Test delete: should not delete")
-  void testDeleteFalse() {
-    var entity = new DynamicEntity();
-    var context = new TaskExecutionContext();
-    var providerConfiguration = new ProviderConfiguration();
-    var entityConfiguration = new EntityConfiguration();
-    var attributes = new HashMap<String, Object>();
-    var access = new HashMap<String, Object>();
-    var deleteAccess = new HashMap<String, Object>();
-
-    providerConfiguration.addOption("baseUrl", "http://localhost:3000");
-    providerConfiguration.addOption("headers", Map.of("Content-Type", "application/json"));
-
-    deleteAccess.put("uri", "/v1/test_api/user/{{ context.id }}");
-    deleteAccess.put("method", "DELETE");
-    deleteAccess.put("result", "{{ context.response.status == \"deleted\" }}");
-
-    access.put("delete", deleteAccess);
-
-    entityConfiguration.setAccess(access);
-    entityConfiguration.setTasks(List.of(buildJsonParsingTask()));
-    entity.setConfiguration(entityConfiguration);
-    entity.setAttributes(attributes);
-
-    var exception = assertThrows(ApiException.class, () -> provider
-        .delete(context, providerConfiguration, "2", entity));
-
-    assertEquals("hpp.error.delete", exception.getError().key());
   }
 
   @Test

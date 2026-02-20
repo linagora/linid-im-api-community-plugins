@@ -169,14 +169,6 @@ public class HttpProviderPlugin implements ProviderPlugin {
     String response = httpService.request(context, providerConfiguration, endpointConfiguration, "delete", dynamicEntity);
     context.put(RESPONSE, response);
 
-    taskEngine.execute(dynamicEntity, context, "beforeResponseMappingDelete");
-    boolean state = "true".equalsIgnoreCase(jinjaService.render(context, dynamicEntity, endpointConfiguration.getResult()));
-    taskEngine.execute(dynamicEntity, context, "afterResponseMappingDelete");
-
-    if (!state) {
-      throw new ApiException(400, I18nMessage.of("hpp.error.delete"));
-    }
-
     return true;
   }
 

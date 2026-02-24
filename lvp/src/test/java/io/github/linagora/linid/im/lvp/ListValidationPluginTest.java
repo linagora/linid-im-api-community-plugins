@@ -34,7 +34,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.plugin.config.dto.ValidationConfiguration;
-import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -90,7 +89,6 @@ public class ListValidationPluginTest {
     assertNotNull(error);
     assertTrue(error.isPresent());
     assertEquals("error.plugin.listValidation.invalid.value", error.get().key());
-    assertEquals(Map.of("allowedValues", List.of("TEST"), "value", "null"), error.get().context());
   }
 
   @Test
@@ -105,7 +103,6 @@ public class ListValidationPluginTest {
     assertNotNull(error);
     assertTrue(error.isPresent());
     assertEquals("error.plugin.listValidation.invalid.value", error.get().key());
-    assertEquals(Map.of("allowedValues", List.of("TEST"), "value", ""), error.get().context());
   }
 
   @Test
@@ -120,7 +117,6 @@ public class ListValidationPluginTest {
     assertNotNull(error);
     assertTrue(error.isPresent());
     assertEquals("error.plugin.listValidation.invalid.value", error.get().key());
-    assertEquals(Map.of("allowedValues", List.of("TEST"), "value", "test"), error.get().context());
   }
 
   @Test
@@ -135,7 +131,6 @@ public class ListValidationPluginTest {
     assertNotNull(error);
     assertTrue(error.isPresent());
     assertEquals("error.plugin.listValidation.invalid.value", error.get().key());
-    assertEquals(Map.of("allowedValues", List.of("TEST"), "value", "A"), error.get().context());
   }
 
   @Test

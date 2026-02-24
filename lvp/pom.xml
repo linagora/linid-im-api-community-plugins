@@ -9,7 +9,7 @@
   </parent>
   <groupId>io.github.linagora.linid.im</groupId>
   <artifactId>lvp</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
   <name>list-validation-plugin</name>
   <description>Plugin to manage static list validation</description>
   <url>https://github.com/linagora/linid-im-api-community-plugins</url>

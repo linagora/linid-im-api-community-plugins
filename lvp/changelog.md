@@ -11,4 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - add list validation plugin
 
+### Fixed
+
+- remove useless context for error message
+
 

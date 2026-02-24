@@ -85,10 +85,7 @@ public class ListValidationPlugin implements ValidationPlugin {
         ));
 
     if (value == null || !allowedValues.contains(value.toString())) {
-      return Optional.of(
-          I18nMessage.of(
-              "error.plugin.listValidation.invalid.value",
-              Map.of(ALLOWED_VALUES, allowedValues, "value", String.valueOf(value))));
+      return Optional.of(I18nMessage.of("error.plugin.listValidation.invalid.value"));
     }
 
     return Optional.empty();

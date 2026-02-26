@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- replace elementValue with elementMapping
 - add dynamic list validation plugin
 - add dynamic list route plugin
 - add HTTP service for external API requests

@@ -36,6 +36,7 @@ import io.github.linagora.linid.im.corelib.plugin.task.TaskEngine;
 import io.github.linagora.linid.im.corelib.plugin.task.TaskExecutionContext;
 import io.github.linagora.linid.im.corelib.plugin.validation.ValidationPlugin;
 import io.github.linagora.linid.im.dlvp.model.DynamicListConfiguration;
+import io.github.linagora.linid.im.dlvp.model.DynamicListEntry;
 import io.github.linagora.linid.im.dlvp.service.HttpService;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +54,8 @@ import org.springframework.stereotype.Component;
  * in the plugin configuration.
  *
  * <p>The plugin orchestrates HTTP calls, task execution (e.g., json-parsing),
- * and value extraction using Jinja templates before performing the validation check.
+ * and element extraction using Jinja templates before performing the validation check.
+ * Only the {@code value} field of each extracted element is used for comparison.
  */
 @Slf4j
 @Component
@@ -125,7 +127,10 @@ public class DynamicListValidationPlugin implements ValidationPlugin, DynamicLis
 
     taskEngine.execute(entity, context, "beforeDynamicListMapping");
 
-    List<String> allowedValues = extractValues(jinjaService, context, dlConfig);
+    List<String> allowedValues = extractElements(jinjaService, context, dlConfig)
+        .stream()
+        .map(DynamicListEntry::value)
+        .toList();
 
     taskEngine.execute(entity, context, "afterDynamicListMapping");
 

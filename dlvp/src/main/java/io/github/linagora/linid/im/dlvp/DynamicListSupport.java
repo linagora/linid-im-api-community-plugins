@@ -34,6 +34,7 @@ import io.github.linagora.linid.im.corelib.plugin.config.dto.TaskConfiguration;
 import io.github.linagora.linid.im.corelib.plugin.entity.DynamicEntity;
 import io.github.linagora.linid.im.corelib.plugin.task.TaskExecutionContext;
 import io.github.linagora.linid.im.dlvp.model.DynamicListConfiguration;
+import io.github.linagora.linid.im.dlvp.model.DynamicListEntry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -49,34 +50,38 @@ import java.util.Map;
 public interface DynamicListSupport {
 
   /**
-   * Extracts string values from the parsed response using Jinja templates.
+   * Extracts structured elements from the parsed response using Jinja templates.
    *
    * <p>Uses the {@code itemsCount} template to determine how many items to extract,
-   * then iterates using the {@code elementValue} template with an {@code index} variable.
+   * then renders the {@code label} and {@code value} templates from {@code elementMapping}
+   * with an {@code index} variable to produce a {@link DynamicListEntry} per item.
    *
    * @param jinjaService the Jinja template rendering service
    * @param context the task execution context containing the parsed response
-   * @param dlConfig the dynamic list configuration with itemsCount and elementValue templates
-   * @return the list of extracted string values
+   * @param dlConfig the dynamic list configuration with itemsCount and elementMapping templates
+   * @return the list of extracted entries
    */
-  default List<String> extractValues(JinjaService jinjaService,
-                                     TaskExecutionContext context,
-                                     DynamicListConfiguration dlConfig) {
+  default List<DynamicListEntry> extractElements(JinjaService jinjaService,
+                                                  TaskExecutionContext context,
+                                                  DynamicListConfiguration dlConfig) {
     DynamicEntity emptyEntity = new DynamicEntity();
 
     int itemsCount = Integer.parseInt(
         jinjaService.render(context, emptyEntity, dlConfig.getItemsCount()).trim()
     );
 
-    List<String> values = new ArrayList<>();
+    List<DynamicListEntry> elements = new ArrayList<>();
+    Map<String, String> mapping = dlConfig.getElementMapping();
 
     for (int i = 0; i < itemsCount; i++) {
+      String label = jinjaService.render(
+          context, emptyEntity, Map.of("index", i), mapping.get("label"));
       String value = jinjaService.render(
-          context, emptyEntity, Map.of("index", i), dlConfig.getElementValue());
-      values.add(value);
+          context, emptyEntity, Map.of("index", i), mapping.get("value"));
+      elements.add(new DynamicListEntry(label, value));
     }
 
-    return values;
+    return elements;
   }
 
   /**

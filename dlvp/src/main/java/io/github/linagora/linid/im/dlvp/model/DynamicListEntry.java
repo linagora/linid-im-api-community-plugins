@@ -26,52 +26,10 @@
 
 package io.github.linagora.linid.im.dlvp.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import java.util.Map;
-import lombok.Data;
-
 /**
- * Configuration model for the Dynamic List Validation Plugin.
+ * Represents a dynamic list entry with a display label and a stored value.
  *
- * <p>All template fields support Jinja templating for dynamic resolution at runtime.
+ * @param label the display label shown in the UI
+ * @param value the stored value used for entity binding and validation
  */
-@Data
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class DynamicListConfiguration {
-
-  /** The external API URL. Supports Jinja templating. */
-  private String url;
-
-  /** The HTTP method (GET or POST). */
-  private String method;
-
-  /** Optional HTTP headers. */
-  private Map<String, String> headers;
-
-  /** Optional request body for POST. Supports Jinja templating. */
-  private String body;
-
-  /** The route path (route plugin only). */
-  private String route;
-
-  /** Current page number from response. Supports Jinja templating. */
-  private String page;
-
-  /** Page size from response. Supports Jinja templating. */
-  private String size;
-
-  /** Total number of elements from response. Supports Jinja templating. */
-  private String total;
-
-  /** Number of items in the current page. Supports Jinja templating. */
-  private String itemsCount;
-
-  /**
-   * Mapping of {@code label} and {@code value} keys to Jinja templates for extracting
-   * structured {@link DynamicListEntry} elements per item.
-   *
-   * <p>Must contain exactly two keys: {@code label} (display text) and {@code value} (stored
-   * identifier). Each template uses {@code index} for iteration over items.
-   */
-  private Map<String, String> elementMapping;
-}
+public record DynamicListEntry(String label, String value) {}

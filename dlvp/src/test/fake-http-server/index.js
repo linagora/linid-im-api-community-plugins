@@ -8,9 +8,9 @@ app.get('/v1/test_api/types', (_httpRequest, httpResponse) => {
     httpResponse.status(200)
         .send({
             content: [
-                { name: 'TYPE1' },
-                { name: 'TYPE2' },
-                { name: 'TYPE3' }
+                { name: 'TYPE1', id: '1' },
+                { name: 'TYPE2', id: '2' },
+                { name: 'TYPE3', id: '3' }
             ],
             page: 0,
             size: 10,
@@ -32,8 +32,8 @@ app.get('/v1/test_api/types/with-headers', (httpRequest, httpResponse) => {
     httpResponse.status(200)
         .send({
             content: [
-                { name: 'SECURE_TYPE1' },
-                { name: 'SECURE_TYPE2' }
+                { name: 'SECURE_TYPE1', id: 'S1' },
+                { name: 'SECURE_TYPE2', id: 'S2' }
             ],
             page: 0,
             size: 10,
@@ -82,9 +82,9 @@ app.post('/v1/test_api/types/search', (httpRequest, httpResponse) => {
     const filter = httpRequest.body.filter || '';
 
     const allTypes = [
-        { name: 'TYPE1' },
-        { name: 'TYPE2' },
-        { name: 'TYPE3' }
+        { name: 'TYPE1', id: '1' },
+        { name: 'TYPE2', id: '2' },
+        { name: 'TYPE3', id: '3' }
     ];
 
     const filtered = filter

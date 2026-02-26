@@ -1,13 +1,13 @@
 # DynamicListValidationPlugin
 
-The `DynamicListValidationPlugin` is a dual plugin (validation + route) that validates attribute values and exposes allowed values from an external API.
+The `DynamicListValidationPlugin` is a dual plugin (validation + route) that validates attribute values and exposes structured elements from an external API.
 
 ## Use Case
 
 Use this plugin when:
 
 - You need to validate that a value belongs to a dynamic list fetched from an external API
-- You want to expose a paginated endpoint returning the list of allowed values (e.g., for frontend dropdowns)
+- You want to expose a paginated endpoint returning structured `{ label, value }` elements (e.g., for frontend dropdowns)
 - You want to enforce constraints that depend on external data (e.g., user types, categories from another system)
 
 ## Architecture
@@ -15,8 +15,8 @@ Use this plugin when:
 The plugin follows the HPP (HTTP Provider Plugin) pattern with clear separation of responsibilities:
 
 - **`HttpService`**: Thin HTTP service that sends an HTTP request to the external API and returns the raw response body.
-- **`DynamicListRoutePlugin`**: Route orchestrator that coordinates the HTTP call, task execution, value extraction, and pagination.
-- **`DynamicListValidationPlugin`**: Validation orchestrator that coordinates the HTTP call, task execution, value extraction, and value checking.
+- **`DynamicListRoutePlugin`**: Route orchestrator that coordinates the HTTP call, task execution, element extraction, and pagination.
+- **`DynamicListValidationPlugin`**: Validation orchestrator that coordinates the HTTP call, task execution, element extraction, and value checking.
 
 ### Phases
 
@@ -41,7 +41,7 @@ Task execution uses multiple phases, organized into three groups:
 
 ### Route Configuration
 
-The route plugin exposes a dynamic endpoint that returns allowed values from the external API as a paginated response.
+The route plugin exposes a dynamic endpoint that returns structured elements from the external API as a paginated response.
 
 ```yaml
 routes:
@@ -61,7 +61,9 @@ routes:
     size: '{{ context.response.size }}'
     total: '{{ context.response.totalElements }}'
     itemsCount: '{{ context.response.content.size() }}'
-    elementValue: '{{ context.response.content[index] }}'
+    elementMapping:
+      label: '{{ context.response.content[index].name }}'
+      value: '{{ context.response.content[index].id }}'
 ```
 
 ### Validation Configuration (inline)
@@ -87,7 +89,9 @@ entities:
                 phases:
                   - beforeDynamicListMapping
             itemsCount: '{{ context.response.content.size() }}'
-            elementValue: '{{ context.response.content[index] }}'
+            elementMapping:
+              label: '{{ context.response.content[index].name }}'
+              value: '{{ context.response.content[index].id }}'
 ```
 
 ### Validation Configuration (global)
@@ -105,7 +109,9 @@ validations:
         phases:
           - beforeDynamicListMapping
     itemsCount: '{{ context.response.content.size() }}'
-    elementValue: '{{ context.response.content[index] }}'
+    elementMapping:
+      label: '{{ context.response.content[index].name }}'
+      value: '{{ context.response.content[index].id }}'
 
 entities:
   - name: user
@@ -120,37 +126,37 @@ entities:
 
 #### Route
 
-| Key            | Required | Description                                                                             |
-| -------------- | -------- | --------------------------------------------------------------------------------------- |
-| `route`        | Yes      | The API route to expose (e.g., `/api/personnes`).                                       |
-| `url`          | Yes      | Full URL of the external API to call. Supports Jinja templating.                        |
-| `method`       | Yes      | HTTP method: `GET` or `POST` only.                                                      |
-| `headers`      | No       | Optional HTTP headers to send with the request (e.g., `Authorization`).                 |
-| `body`         | No       | Optional request body for POST requests. Supports Jinja templating.                     |
-| `tasks`        | No       | List of tasks to execute at specific phases (e.g., `json-parsing`).                     |
-| `page`         | Yes      | Current page number from response. Supports Jinja templating.                           |
-| `size`         | Yes      | Page size from response. Supports Jinja templating.                                     |
-| `total`        | Yes      | Total number of elements from response. Supports Jinja templating.                      |
-| `itemsCount`   | Yes      | Number of items in the current page. Supports Jinja templating.                         |
-| `elementValue` | Yes      | Value to extract for each item, using `index` for iteration. Supports Jinja templating. |
+| Key              | Required | Description                                                                                                                 |
+| ---------------- | -------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `route`          | Yes      | The API route to expose (e.g., `/api/personnes`).                                                                           |
+| `url`            | Yes      | Full URL of the external API to call. Supports Jinja templating.                                                            |
+| `method`         | Yes      | HTTP method: `GET` or `POST` only.                                                                                          |
+| `headers`        | No       | Optional HTTP headers to send with the request (e.g., `Authorization`).                                                     |
+| `body`           | No       | Optional request body for POST requests. Supports Jinja templating.                                                         |
+| `tasks`          | No       | List of tasks to execute at specific phases (e.g., `json-parsing`).                                                         |
+| `page`           | Yes      | Current page number from response. Supports Jinja templating.                                                               |
+| `size`           | Yes      | Page size from response. Supports Jinja templating.                                                                         |
+| `total`          | Yes      | Total number of elements from response. Supports Jinja templating.                                                          |
+| `itemsCount`     | Yes      | Number of items in the current page. Supports Jinja templating.                                                             |
+| `elementMapping` | Yes      | Map of keys to Jinja templates for extracting structured elements per item. Must contain at least `label` and `value` keys. |
 
 #### Validation
 
-| Key            | Required | Description                                                                             |
-| -------------- | -------- | --------------------------------------------------------------------------------------- |
-| `url`          | Yes      | Full URL of the external API to call. Supports Jinja templating.                        |
-| `method`       | Yes      | HTTP method: `GET` or `POST` only.                                                      |
-| `headers`      | No       | Optional HTTP headers to send with the request (e.g., `Authorization`).                 |
-| `body`         | No       | Optional request body for POST requests. Supports Jinja templating.                     |
-| `tasks`        | No       | List of tasks to execute at specific phases (e.g., `json-parsing`).                     |
-| `itemsCount`   | Yes      | Number of items in the response. Supports Jinja templating.                             |
-| `elementValue` | Yes      | Value to extract for each item, using `index` for iteration. Supports Jinja templating. |
+| Key              | Required | Description                                                                                                                 |
+| ---------------- | -------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `url`            | Yes      | Full URL of the external API to call. Supports Jinja templating.                                                            |
+| `method`         | Yes      | HTTP method: `GET` or `POST` only.                                                                                          |
+| `headers`        | No       | Optional HTTP headers to send with the request (e.g., `Authorization`).                                                     |
+| `body`           | No       | Optional request body for POST requests. Supports Jinja templating.                                                         |
+| `tasks`          | No       | List of tasks to execute at specific phases (e.g., `json-parsing`).                                                         |
+| `itemsCount`     | Yes      | Number of items in the response. Supports Jinja templating.                                                                 |
+| `elementMapping` | Yes      | Map of keys to Jinja templates for extracting structured elements per item. Must contain at least `label` and `value` keys. |
 
 ## Behavior
 
 - The plugin consists of two types:
-  - **Validation plugin** (`type: dynamic-list`): validates that a value is included in the list fetched from the external API.
-  - **Route plugin** (`name: dynamic-list`): exposes a configurable endpoint (via `route`) returning allowed values as a paginated `Page<String>` response.
+  - **Validation plugin** (`type: dynamic-list`): validates that a value is included in the list fetched from the external API. Only the `value` field of each element is used for comparison.
+  - **Route plugin** (`name: dynamic-list`): exposes a configurable endpoint (via `route`) returning structured elements as a paginated `Page<DynamicListEntry>` response, where `DynamicListEntry` is a record with `label` and `value` fields.
 
 - Both plugins share a common HTTP service (`HttpService`) that sends an HTTP request to the configured `url` with optional `headers` and `body`, and returns the raw response body.
 
@@ -160,7 +166,7 @@ entities:
   3. Send the HTTP request to the external API.
   4. Execute tasks at the `afterDynamicList` phase (e.g., `json-parsing` to parse JSON).
   5. Execute tasks at the `beforeDynamicListMapping` phase.
-  6. Use Jinja templates (`itemsCount` + `elementValue`) to extract values from the parsed response.
+  6. Use Jinja templates (`itemsCount` + `elementMapping`) to extract structured elements from the parsed response.
   7. Execute tasks at the `afterDynamicListMapping` phase.
 
 - The **validation plugin** orchestration flow:
@@ -168,8 +174,9 @@ entities:
   2. Send the HTTP request to the external API.
   3. Execute tasks at the `afterDynamicList` phase (e.g., `json-parsing` to parse JSON).
   4. Execute tasks at the `beforeDynamicListMapping` phase.
-  5. Use Jinja templates (`itemsCount` + `elementValue`) to extract values from the parsed response.
-  6. Execute tasks at the `afterDynamicListMapping` phase.
+  5. Use Jinja templates (`itemsCount` + `elementMapping`) to extract structured elements from the parsed response.
+  6. Compare the input value against the `value` field of each extracted element.
+  7. Execute tasks at the `afterDynamicListMapping` phase.
 
 - Only `GET` and `POST` methods are supported. Any other method results in an error.
 - JSON responses are parsed via the `json-parsing` task plugin (from the `jptp` module).
@@ -181,8 +188,10 @@ entities:
 
 ## Notes
 
-- Templating uses Jinja (via `JinjaService`) to dynamically extract values from the response.
-- The `elementValue` template must use `index` to iterate over items (e.g., `{{ context.response.content[index] }}`).
+- Templating uses Jinja (via `JinjaService`) to dynamically extract elements from the response.
+- The `elementMapping` templates must use `index` to iterate over items (e.g., `{{ context.response.content[index].name }}`).
+- The `elementMapping` must include `label` and `value` keys. These are the only keys used by the `DynamicListEntry` record.
+- The route plugin returns `DynamicListEntry` records (`{ label, value }`); the validation plugin validates against `value` only.
 - The validation is **case-sensitive**.
 - `null` values are rejected by the validation.
 - Each validation call makes a live HTTP request to the external API.

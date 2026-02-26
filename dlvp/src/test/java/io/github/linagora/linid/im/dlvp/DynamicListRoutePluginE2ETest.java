@@ -38,10 +38,10 @@ import io.github.linagora.linid.im.corelib.plugin.authorization.AuthorizationFac
 import io.github.linagora.linid.im.corelib.plugin.config.JinjaService;
 import io.github.linagora.linid.im.corelib.plugin.config.dto.RootConfiguration;
 import io.github.linagora.linid.im.corelib.plugin.config.dto.RouteConfiguration;
-import io.github.linagora.linid.im.corelib.plugin.config.dto.TaskConfiguration;
 import io.github.linagora.linid.im.corelib.plugin.entity.DynamicEntity;
 import io.github.linagora.linid.im.corelib.plugin.task.TaskEngine;
 import io.github.linagora.linid.im.corelib.plugin.task.TaskExecutionContext;
+import io.github.linagora.linid.im.dlvp.model.DynamicListEntry;
 import io.github.linagora.linid.im.dlvp.service.HttpServiceImpl;
 import io.github.linagora.linid.im.jptp.JsonParsingTaskPlugin;
 import jakarta.servlet.http.HttpServletRequest;
@@ -75,7 +75,10 @@ class DynamicListRoutePluginE2ETest {
     configuration.addOption("url", url);
     configuration.addOption("method", method);
     configuration.addOption("itemsCount", "{{ context.response.content.size() }}");
-    configuration.addOption("elementValue", "{{ context.response.content[index].name }}");
+    configuration.addOption("elementMapping", Map.of(
+        "label", "{{ context.response.content[index].name }}",
+        "value", "{{ context.response.content[index].id }}"
+    ));
     configuration.addOption("page", "{{ context.response.page }}");
     configuration.addOption("size", "{{ context.response.size }}");
     configuration.addOption("total", "{{ context.response.totalElements }}");
@@ -88,7 +91,7 @@ class DynamicListRoutePluginE2ETest {
   }
 
   @Test
-  @DisplayName("test execute: should return paginated values from external API via GET")
+  @DisplayName("test execute: should return paginated elements from external API via GET")
   void testExecuteGet() {
     plugin.setConfiguration(buildConfiguration("http://localhost:3001/v1/test_api/types", "GET"));
 
@@ -97,16 +100,20 @@ class DynamicListRoutePluginE2ETest {
     assertNotNull(response);
     assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
 
-    Page<String> page = response.getBody();
+    Page<DynamicListEntry> page = response.getBody();
     assertNotNull(page);
-    assertEquals(List.of("TYPE1", "TYPE2", "TYPE3"), page.getContent());
+    assertEquals(List.of(
+        new DynamicListEntry("TYPE1", "1"),
+        new DynamicListEntry("TYPE2", "2"),
+        new DynamicListEntry("TYPE3", "3")
+    ), page.getContent());
     assertEquals(0, page.getNumber());
     assertEquals(10, page.getSize());
     assertEquals(3, page.getTotalElements());
   }
 
   @Test
-  @DisplayName("test execute: should return values with custom headers")
+  @DisplayName("test execute: should return elements with custom headers")
   void testExecuteWithHeaders() {
     var configuration = buildConfiguration(
         "http://localhost:3001/v1/test_api/types/with-headers", "GET");
@@ -118,9 +125,12 @@ class DynamicListRoutePluginE2ETest {
     assertNotNull(response);
     assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
 
-    Page<String> page = response.getBody();
+    Page<DynamicListEntry> page = response.getBody();
     assertNotNull(page);
-    assertEquals(List.of("SECURE_TYPE1", "SECURE_TYPE2"), page.getContent());
+    assertEquals(List.of(
+        new DynamicListEntry("SECURE_TYPE1", "S1"),
+        new DynamicListEntry("SECURE_TYPE2", "S2")
+    ), page.getContent());
     assertEquals(2, page.getTotalElements());
   }
 
@@ -179,14 +189,14 @@ class DynamicListRoutePluginE2ETest {
     var response = plugin.execute(null);
 
     assertNotNull(response);
-    Page<String> page = response.getBody();
+    Page<DynamicListEntry> page = response.getBody();
     assertNotNull(page);
     assertTrue(page.getContent().isEmpty());
     assertEquals(0, page.getTotalElements());
   }
 
   @Test
-  @DisplayName("test execute: should return values via POST method")
+  @DisplayName("test execute: should return elements via POST method")
   void testExecutePost() {
     var configuration = buildConfiguration(
         "http://localhost:3001/v1/test_api/types/search", "POST");
@@ -200,9 +210,13 @@ class DynamicListRoutePluginE2ETest {
     assertNotNull(response);
     assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
 
-    Page<String> page = response.getBody();
+    Page<DynamicListEntry> page = response.getBody();
     assertNotNull(page);
-    assertEquals(List.of("TYPE1", "TYPE2", "TYPE3"), page.getContent());
+    assertEquals(List.of(
+        new DynamicListEntry("TYPE1", "1"),
+        new DynamicListEntry("TYPE2", "2"),
+        new DynamicListEntry("TYPE3", "3")
+    ), page.getContent());
   }
 
   @Test

@@ -39,6 +39,7 @@ import io.github.linagora.linid.im.corelib.plugin.route.RouteDescription;
 import io.github.linagora.linid.im.corelib.plugin.task.TaskEngine;
 import io.github.linagora.linid.im.corelib.plugin.task.TaskExecutionContext;
 import io.github.linagora.linid.im.dlvp.model.DynamicListConfiguration;
+import io.github.linagora.linid.im.dlvp.model.DynamicListEntry;
 import io.github.linagora.linid.im.dlvp.service.HttpService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -56,8 +57,8 @@ import org.springframework.stereotype.Component;
 /**
  * Dynamic List Route Plugin implementation for LinID Directory Manager.
  *
- * <p>This plugin exposes a configurable GET endpoint that retrieves allowed values from an external API
- * and returns them as a paginated JSON response.
+ * <p>This plugin exposes a configurable GET endpoint that retrieves structured elements from an external
+ * API and returns them as a paginated JSON response with {@code { label, value }} objects.
  *
  * <p>The route path is dynamic and defined via the {@code route} configuration option.
  * The plugin orchestrates HTTP calls, task execution (e.g., json-parsing),
@@ -136,7 +137,7 @@ public class DynamicListRoutePlugin extends AbstractRoutePlugin implements Dynam
   }
 
   @Override
-  public ResponseEntity<Page<String>> execute(final HttpServletRequest request) {
+  public ResponseEntity<Page<DynamicListEntry>> execute(final HttpServletRequest request) {
     String route = getConfiguration().getOption("route")
         .orElseThrow(() -> new ApiException(
             500,
@@ -166,17 +167,17 @@ public class DynamicListRoutePlugin extends AbstractRoutePlugin implements Dynam
 
     taskEngine.execute(entity, context, "beforeDynamicListMapping");
 
-    List<String> values = extractValues(jinjaService, context, dlConfig);
-    Page<String> page = buildPage(context, dlConfig, values);
+    List<DynamicListEntry> elements = extractElements(jinjaService, context, dlConfig);
+    Page<DynamicListEntry> page = buildPage(context, dlConfig, elements);
 
     taskEngine.execute(entity, context, "afterDynamicListMapping");
 
     return ResponseEntity.ok(page);
   }
 
-  Page<String> buildPage(final TaskExecutionContext context,
-                                 final DynamicListConfiguration dlConfig,
-                                 final List<String> values) {
+  Page<DynamicListEntry> buildPage(final TaskExecutionContext context,
+                                    final DynamicListConfiguration dlConfig,
+                                    final List<DynamicListEntry> elements) {
     DynamicEntity emptyEntity = new DynamicEntity();
 
     int page = Integer.parseInt(jinjaService.render(context, emptyEntity,
@@ -186,7 +187,7 @@ public class DynamicListRoutePlugin extends AbstractRoutePlugin implements Dynam
     long total = Long.parseLong(jinjaService.render(context, emptyEntity,
         Optional.ofNullable(dlConfig.getTotal()).orElse("0")).trim());
 
-    return new PageImpl<>(values, PageRequest.of(page, Math.max(size, 1)), total);
+    return new PageImpl<>(elements, PageRequest.of(page, Math.max(size, 1)), total);
   }
 
 }

@@ -82,7 +82,10 @@ class DynamicListValidationPluginTest {
     configuration.addOption("url", "https://api.example.com/types");
     configuration.addOption("method", "GET");
     configuration.addOption("itemsCount", "{{ context.response.content.size() }}");
-    configuration.addOption("elementValue", "{{ context.response.content[index] }}");
+    configuration.addOption("elementMapping", Map.of(
+        "label", "{{ context.response.content[index].name }}",
+        "value", "{{ context.response.content[index].id }}"
+    ));
     configuration.addOption("tasks", List.of(
         Map.of("type", "json-parsing", "source", "response",
             "destination", "response",
@@ -91,16 +94,21 @@ class DynamicListValidationPluginTest {
     return configuration;
   }
 
-  private void mockServiceAndJinja(String... values) {
+  private void mockServiceAndJinja(String[]... labelValuePairs) {
     when(httpService.request(any(TaskExecutionContext.class), any(PluginConfiguration.class)))
         .thenReturn("{\"content\":[]}");
 
     when(jinjaService.render(any(TaskExecutionContext.class), any(DynamicEntity.class),
-        eq("{{ context.response.content.size() }}"))).thenReturn(String.valueOf(values.length));
+        eq("{{ context.response.content.size() }}")))
+        .thenReturn(String.valueOf(labelValuePairs.length));
 
-    for (int i = 0; i < values.length; i++) {
+    for (int i = 0; i < labelValuePairs.length; i++) {
       when(jinjaService.render(any(TaskExecutionContext.class), any(DynamicEntity.class),
-          eq(Map.of("index", i)), eq("{{ context.response.content[index] }}"))).thenReturn(values[i]);
+          eq(Map.of("index", i)), eq("{{ context.response.content[index].name }}")))
+          .thenReturn(labelValuePairs[i][0]);
+      when(jinjaService.render(any(TaskExecutionContext.class), any(DynamicEntity.class),
+          eq(Map.of("index", i)), eq("{{ context.response.content[index].id }}")))
+          .thenReturn(labelValuePairs[i][1]);
     }
   }
 
@@ -124,7 +132,7 @@ class DynamicListValidationPluginTest {
   @DisplayName("test validate: should return message on invalid value")
   void testValidateInvalidValue() {
     var configuration = buildConfiguration();
-    mockServiceAndJinja("A", "B");
+    mockServiceAndJinja(new String[]{"TypeA", "A"}, new String[]{"TypeB", "B"});
 
     var error = plugin.validate(configuration, "C");
 
@@ -141,7 +149,7 @@ class DynamicListValidationPluginTest {
   @DisplayName("test validate: should not return message on valid value")
   void testValidateValidValue() {
     var configuration = buildConfiguration();
-    mockServiceAndJinja("A", "B");
+    mockServiceAndJinja(new String[]{"TypeA", "A"}, new String[]{"TypeB", "B"});
 
     var error = plugin.validate(configuration, "A");
 
@@ -175,7 +183,7 @@ class DynamicListValidationPluginTest {
   @DisplayName("test validate: should validate case-sensitive values")
   void testValidateCaseSensitive() {
     var configuration = buildConfiguration();
-    mockServiceAndJinja("ACTIVE");
+    mockServiceAndJinja(new String[]{"Active", "ACTIVE"});
 
     var error = plugin.validate(configuration, "active");
 
@@ -198,7 +206,7 @@ class DynamicListValidationPluginTest {
   @DisplayName("test validate: should convert non-string value types using toString")
   void testValidateNonStringValueTypes() {
     var configuration = buildConfiguration();
-    mockServiceAndJinja("42", "true");
+    mockServiceAndJinja(new String[]{"FortyTwo", "42"}, new String[]{"True", "true"});
 
     var errorInt = plugin.validate(configuration, 42);
 

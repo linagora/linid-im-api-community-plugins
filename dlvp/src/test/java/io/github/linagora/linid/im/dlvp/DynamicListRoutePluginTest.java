@@ -46,6 +46,7 @@ import io.github.linagora.linid.im.corelib.plugin.entity.DynamicEntity;
 import io.github.linagora.linid.im.corelib.plugin.route.RouteDescription;
 import io.github.linagora.linid.im.corelib.plugin.task.TaskEngine;
 import io.github.linagora.linid.im.corelib.plugin.task.TaskExecutionContext;
+import io.github.linagora.linid.im.dlvp.model.DynamicListEntry;
 import io.github.linagora.linid.im.dlvp.service.HttpService;
 import java.util.List;
 import java.util.Map;
@@ -161,7 +162,10 @@ class DynamicListRoutePluginTest {
     configuration.addOption("url", "https://external-api.com/types");
     configuration.addOption("method", "GET");
     configuration.addOption("itemsCount", "{{ context.response.content.size() }}");
-    configuration.addOption("elementValue", "{{ context.response.content[index] }}");
+    configuration.addOption("elementMapping", Map.of(
+        "label", "{{ context.response.content[index].name }}",
+        "value", "{{ context.response.content[index].id }}"
+    ));
     configuration.addOption("page", "{{ context.response.page }}");
     configuration.addOption("size", "{{ context.response.size }}");
     configuration.addOption("total", "{{ context.response.totalElements }}");
@@ -174,14 +178,23 @@ class DynamicListRoutePluginTest {
 
     when(authorizationFactory.getAuthorizationPlugin()).thenReturn(authorizationPlugin);
     when(httpService.request(any(TaskExecutionContext.class), any(PluginConfiguration.class)))
-        .thenReturn("{\"content\":[\"TYPE1\",\"TYPE2\"],\"page\":0,\"size\":10,\"totalElements\":2}");
+        .thenReturn("{\"content\":[{\"name\":\"Type 1\",\"id\":\"1\"},{\"name\":\"Type 2\",\"id\":\"2\"}],"
+            + "\"page\":0,\"size\":10,\"totalElements\":2}");
 
     when(jinjaService.render(any(TaskExecutionContext.class), any(DynamicEntity.class),
         eq("{{ context.response.content.size() }}"))).thenReturn("2");
     when(jinjaService.render(any(TaskExecutionContext.class), any(DynamicEntity.class),
-        eq(Map.of("index", 0)), eq("{{ context.response.content[index] }}"))).thenReturn("TYPE1");
+        eq(Map.of("index", 0)), eq("{{ context.response.content[index].name }}")))
+        .thenReturn("Type 1");
     when(jinjaService.render(any(TaskExecutionContext.class), any(DynamicEntity.class),
-        eq(Map.of("index", 1)), eq("{{ context.response.content[index] }}"))).thenReturn("TYPE2");
+        eq(Map.of("index", 0)), eq("{{ context.response.content[index].id }}")))
+        .thenReturn("1");
+    when(jinjaService.render(any(TaskExecutionContext.class), any(DynamicEntity.class),
+        eq(Map.of("index", 1)), eq("{{ context.response.content[index].name }}")))
+        .thenReturn("Type 2");
+    when(jinjaService.render(any(TaskExecutionContext.class), any(DynamicEntity.class),
+        eq(Map.of("index", 1)), eq("{{ context.response.content[index].id }}")))
+        .thenReturn("2");
     when(jinjaService.render(any(TaskExecutionContext.class), any(DynamicEntity.class),
         eq("{{ context.response.page }}"))).thenReturn("0");
     when(jinjaService.render(any(TaskExecutionContext.class), any(DynamicEntity.class),
@@ -194,9 +207,12 @@ class DynamicListRoutePluginTest {
     assertNotNull(response);
     assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
 
-    Page<String> page = response.getBody();
+    Page<DynamicListEntry> page = response.getBody();
     assertNotNull(page);
-    assertEquals(List.of("TYPE1", "TYPE2"), page.getContent());
+    assertEquals(List.of(
+        new DynamicListEntry("Type 1", "1"),
+        new DynamicListEntry("Type 2", "2")
+    ), page.getContent());
     assertEquals(0, page.getNumber());
     assertEquals(10, page.getSize());
     assertEquals(2, page.getTotalElements());

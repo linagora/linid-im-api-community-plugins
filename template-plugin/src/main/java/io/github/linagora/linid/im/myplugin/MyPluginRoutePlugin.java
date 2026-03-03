@@ -27,8 +27,9 @@
 package io.github.linagora.linid.im.myplugin;
 
 import io.github.linagora.linid.im.corelib.plugin.config.dto.EntityConfiguration;
-import io.github.linagora.linid.im.corelib.plugin.route.AbstractRoutePlugin;
+import io.github.linagora.linid.im.corelib.plugin.config.dto.RouteConfiguration;
 import io.github.linagora.linid.im.corelib.plugin.route.RouteDescription;
+import io.github.linagora.linid.im.corelib.plugin.route.RoutePlugin;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +42,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class MyPluginRoutePlugin extends AbstractRoutePlugin {
+public class MyPluginRoutePlugin implements RoutePlugin {
 
   @Override
   public boolean supports(final @NonNull String type) {
@@ -49,17 +50,20 @@ public class MyPluginRoutePlugin extends AbstractRoutePlugin {
   }
 
   @Override
-  public List<RouteDescription> getRoutes(List<EntityConfiguration> list) {
+  public List<RouteDescription> getRoutes(final RouteConfiguration configuration,
+                                          final List<EntityConfiguration> list) {
     return List.of(new RouteDescription("GET", "/myPlugin", null, List.of()));
   }
 
   @Override
-  public boolean match(final String url, final String method) {
+  public boolean match(final RouteConfiguration configuration,
+                       final String url, final String method) {
     return url.endsWith("/api/MyPlugin");
   }
 
   @Override
-  public ResponseEntity<?> execute(final HttpServletRequest request) {
+  public ResponseEntity<?> execute(final RouteConfiguration configuration,
+                                   final HttpServletRequest request) {
     log.info("Receiving request on route 'MyPlugin'");
     return ResponseEntity.ok("MyPlugin route");
   }

@@ -31,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.github.linagora.linid.im.corelib.plugin.config.dto.RouteConfiguration;
 import io.github.linagora.linid.im.corelib.plugin.route.RouteDescription;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -57,21 +58,24 @@ class MyPluginRoutePluginTest {
   @Test
   @DisplayName("Test getRoutes: should return true only on MyPlugin")
   void testGetRoutes() {
+    var configuration = new RouteConfiguration();
     var expected = List.of(new RouteDescription("GET", "/myPlugin", null, List.of()));
-    assertEquals(expected, plugin.getRoutes(List.of()));
+    assertEquals(expected, plugin.getRoutes(configuration, List.of()));
   }
 
   @Test
   @DisplayName("Test match: should return true on valid route")
   void testMatch() {
-    assertTrue(plugin.match("/api/MyPlugin", "GET"));
-    assertFalse(plugin.match("Other", "GET"));
+    var configuration = new RouteConfiguration();
+    assertTrue(plugin.match(configuration, "/api/MyPlugin", "GET"));
+    assertFalse(plugin.match(configuration, "Other", "GET"));
   }
 
   @Test
   @DisplayName("Test execute: should return ok response")
   void testExecute() {
-    var response = plugin.execute(null);
+    var configuration = new RouteConfiguration();
+    var response = plugin.execute(configuration, null);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());

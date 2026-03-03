@@ -33,9 +33,10 @@ import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import io.github.linagora.linid.im.corelib.plugin.authorization.AuthorizationFactory;
 import io.github.linagora.linid.im.corelib.plugin.config.JinjaService;
 import io.github.linagora.linid.im.corelib.plugin.config.dto.EntityConfiguration;
+import io.github.linagora.linid.im.corelib.plugin.config.dto.RouteConfiguration;
 import io.github.linagora.linid.im.corelib.plugin.entity.DynamicEntity;
-import io.github.linagora.linid.im.corelib.plugin.route.AbstractRoutePlugin;
 import io.github.linagora.linid.im.corelib.plugin.route.RouteDescription;
+import io.github.linagora.linid.im.corelib.plugin.route.RoutePlugin;
 import io.github.linagora.linid.im.corelib.plugin.task.TaskEngine;
 import io.github.linagora.linid.im.corelib.plugin.task.TaskExecutionContext;
 import io.github.linagora.linid.im.dlvp.model.DynamicListConfiguration;
@@ -66,7 +67,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class DynamicListRoutePlugin extends AbstractRoutePlugin implements DynamicListSupport {
+public class DynamicListRoutePlugin implements RoutePlugin, DynamicListSupport {
 
   /** I18n key for missing configuration option errors. */
   private static final String MISSING_OPTION = "error.plugin.default.missing.option";
@@ -114,8 +115,9 @@ public class DynamicListRoutePlugin extends AbstractRoutePlugin implements Dynam
   }
 
   @Override
-  public List<RouteDescription> getRoutes(final List<EntityConfiguration> entities) {
-    String route = getConfiguration().getOption("route")
+  public List<RouteDescription> getRoutes(final RouteConfiguration configuration,
+                                          final List<EntityConfiguration> entities) {
+    String route = configuration.getOption("route")
         .orElseThrow(() -> new ApiException(
             500,
             I18nMessage.of(MISSING_OPTION, Map.of(OPTION, "route"))
@@ -124,11 +126,12 @@ public class DynamicListRoutePlugin extends AbstractRoutePlugin implements Dynam
   }
 
   @Override
-  public boolean match(final String url, final String method) {
-    if (getConfiguration() == null) {
+  public boolean match(final RouteConfiguration configuration,
+                       final String url, final String method) {
+    if (configuration == null) {
       return false;
     }
-    String route = getConfiguration().getOption("route")
+    String route = configuration.getOption("route")
         .orElseThrow(() -> new ApiException(
             500,
             I18nMessage.of(MISSING_OPTION, Map.of(OPTION, "route"))
@@ -137,8 +140,9 @@ public class DynamicListRoutePlugin extends AbstractRoutePlugin implements Dynam
   }
 
   @Override
-  public ResponseEntity<Page<DynamicListEntry>> execute(final HttpServletRequest request) {
-    String route = getConfiguration().getOption("route")
+  public ResponseEntity<Page<DynamicListEntry>> execute(final RouteConfiguration configuration,
+                                                        final HttpServletRequest request) {
+    String route = configuration.getOption("route")
         .orElseThrow(() -> new ApiException(
             500,
             I18nMessage.of(MISSING_OPTION, Map.of(OPTION, "route"))
@@ -146,11 +150,11 @@ public class DynamicListRoutePlugin extends AbstractRoutePlugin implements Dynam
     log.info("Receiving request on dynamic-list route '{}'", route);
 
     DynamicListConfiguration dlConfig = mapper.convertValue(
-        getConfiguration().getOptions(), new TypeReference<>() {
+        configuration.getOptions(), new TypeReference<>() {
         });
 
     TaskExecutionContext context = new TaskExecutionContext();
-    DynamicEntity entity = buildDynamicEntity(getConfiguration());
+    DynamicEntity entity = buildDynamicEntity(configuration);
 
     var authorizationPlugin = authorizationFactory.getAuthorizationPlugin();
 
@@ -160,7 +164,7 @@ public class DynamicListRoutePlugin extends AbstractRoutePlugin implements Dynam
 
     taskEngine.execute(entity, context, "beforeDynamicList");
 
-    String response = httpService.request(context, getConfiguration());
+    String response = httpService.request(context, configuration);
     context.put("response", response);
 
     taskEngine.execute(entity, context, "afterDynamicList");

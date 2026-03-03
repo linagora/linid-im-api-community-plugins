@@ -93,10 +93,9 @@ class DynamicListRoutePluginTest {
   void testGetRoutes() {
     var configuration = new RouteConfiguration();
     configuration.addOption("route", "/api/etablissement/types");
-    plugin.setConfiguration(configuration);
 
     var expected = List.of(new RouteDescription("GET", "/api/etablissement/types", null, List.of()));
-    assertEquals(expected, plugin.getRoutes(List.of()));
+    assertEquals(expected, plugin.getRoutes(configuration, List.of()));
   }
 
   @Test
@@ -104,11 +103,10 @@ class DynamicListRoutePluginTest {
   void testMatch() {
     var configuration = new RouteConfiguration();
     configuration.addOption("route", "/api/etablissement/types");
-    plugin.setConfiguration(configuration);
 
-    assertTrue(plugin.match("/api/etablissement/types", "GET"));
-    assertFalse(plugin.match("/api/other", "GET"));
-    assertFalse(plugin.match("/api/etablissement/types", "POST"));
+    assertTrue(plugin.match(configuration, "/api/etablissement/types", "GET"));
+    assertFalse(plugin.match(configuration, "/api/other", "GET"));
+    assertFalse(plugin.match(configuration, "/api/etablissement/types", "POST"));
   }
 
   @Test
@@ -116,26 +114,24 @@ class DynamicListRoutePluginTest {
   void testMatchCaseInsensitiveMethod() {
     var configuration = new RouteConfiguration();
     configuration.addOption("route", "/api/etablissement/types");
-    plugin.setConfiguration(configuration);
 
-    assertTrue(plugin.match("/api/etablissement/types", "get"));
-    assertTrue(plugin.match("/api/etablissement/types", "Get"));
+    assertTrue(plugin.match(configuration, "/api/etablissement/types", "get"));
+    assertTrue(plugin.match(configuration, "/api/etablissement/types", "Get"));
   }
 
   @Test
   @DisplayName("test match: should return false when no configuration")
   void testMatchNoConfiguration() {
-    assertFalse(plugin.match("/api/anything", "GET"));
+    assertFalse(plugin.match(null, "/api/anything", "GET"));
   }
 
   @Test
   @DisplayName("test getRoutes: should throw exception when route is null")
   void testGetRoutesNullRoute() {
     var configuration = new RouteConfiguration();
-    plugin.setConfiguration(configuration);
 
     ApiException exception =
-        assertThrows(ApiException.class, () -> plugin.getRoutes(List.of()));
+        assertThrows(ApiException.class, () -> plugin.getRoutes(configuration, List.of()));
 
     assertEquals(500, exception.getStatusCode());
     assertEquals("error.plugin.default.missing.option", exception.getError().key());
@@ -145,10 +141,9 @@ class DynamicListRoutePluginTest {
   @DisplayName("test match: should throw exception when route is null")
   void testMatchNullRoute() {
     var configuration = new RouteConfiguration();
-    plugin.setConfiguration(configuration);
 
     ApiException exception =
-        assertThrows(ApiException.class, () -> plugin.match("/api/anything", "GET"));
+        assertThrows(ApiException.class, () -> plugin.match(configuration, "/api/anything", "GET"));
 
     assertEquals(500, exception.getStatusCode());
     assertEquals("error.plugin.default.missing.option", exception.getError().key());
@@ -174,8 +169,6 @@ class DynamicListRoutePluginTest {
             "destination", "response",
             "phases", List.of("beforeDynamicListMapping"))
     ));
-    plugin.setConfiguration(configuration);
-
     when(authorizationFactory.getAuthorizationPlugin()).thenReturn(authorizationPlugin);
     when(httpService.request(any(TaskExecutionContext.class), any(PluginConfiguration.class)))
         .thenReturn("{\"content\":[{\"name\":\"Type 1\",\"id\":\"1\"},{\"name\":\"Type 2\",\"id\":\"2\"}],"
@@ -202,7 +195,7 @@ class DynamicListRoutePluginTest {
     when(jinjaService.render(any(TaskExecutionContext.class), any(DynamicEntity.class),
         eq("{{ context.response.totalElements }}"))).thenReturn("2");
 
-    var response = plugin.execute(null);
+    var response = plugin.execute(configuration, null);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());

@@ -45,7 +45,7 @@ The route plugin exposes a dynamic endpoint that returns structured elements fro
 
 ```yaml
 routes:
-  - name: dynamic-list
+  - type: dynamic-list
     route: /api/something
     url: https://external-api.com/api/personnes
     method: GET
@@ -156,7 +156,7 @@ entities:
 
 - The plugin consists of two types:
   - **Validation plugin** (`type: dynamic-list`): validates that a value is included in the list fetched from the external API. Only the `value` field of each element is used for comparison.
-  - **Route plugin** (`name: dynamic-list`): exposes a configurable endpoint (via `route`) returning structured elements as a paginated `Page<DynamicListEntry>` response, where `DynamicListEntry` is a record with `label` and `value` fields.
+  - **Route plugin** (`type: dynamic-list`): exposes a configurable endpoint (via `route`) returning structured elements as a paginated `Page<DynamicListEntry>` response, where `DynamicListEntry` is a record with `label` and `value` fields.
 
 - Both plugins share a common HTTP service (`HttpService`) that sends an HTTP request to the configured `url` with optional `headers` and `body`, and returns the raw response body.
 

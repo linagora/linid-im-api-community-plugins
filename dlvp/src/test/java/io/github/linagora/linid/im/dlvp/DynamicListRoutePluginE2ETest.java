@@ -93,9 +93,9 @@ class DynamicListRoutePluginE2ETest {
   @Test
   @DisplayName("test execute: should return paginated elements from external API via GET")
   void testExecuteGet() {
-    plugin.setConfiguration(buildConfiguration("http://localhost:3001/v1/test_api/types", "GET"));
+    var configuration = buildConfiguration("http://localhost:3001/v1/test_api/types", "GET");
 
-    var response = plugin.execute(null);
+    var response = plugin.execute(configuration, null);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
@@ -118,9 +118,8 @@ class DynamicListRoutePluginE2ETest {
     var configuration = buildConfiguration(
         "http://localhost:3001/v1/test_api/types/with-headers", "GET");
     configuration.addOption("headers", Map.of("Authorization", "Bearer my-token"));
-    plugin.setConfiguration(configuration);
 
-    var response = plugin.execute(null);
+    var response = plugin.execute(configuration, null);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
@@ -137,10 +136,11 @@ class DynamicListRoutePluginE2ETest {
   @Test
   @DisplayName("test execute: should throw exception on 401 without auth header")
   void testExecuteUnauthorized() {
-    plugin.setConfiguration(buildConfiguration(
-        "http://localhost:3001/v1/test_api/types/with-headers", "GET"));
+    var configuration = buildConfiguration(
+        "http://localhost:3001/v1/test_api/types/with-headers", "GET");
 
-    ApiException exception = assertThrows(ApiException.class, () -> plugin.execute(null));
+    ApiException exception = assertThrows(ApiException.class,
+        () -> plugin.execute(configuration, null));
 
     assertEquals(401, exception.getStatusCode());
     assertEquals("dlvp.error.external.api", exception.getError().key());
@@ -149,9 +149,10 @@ class DynamicListRoutePluginE2ETest {
   @Test
   @DisplayName("test execute: should throw exception on 4xx error")
   void testExecute4xx() {
-    plugin.setConfiguration(buildConfiguration("http://localhost:3001/v1/test_api/400", "GET"));
+    var configuration = buildConfiguration("http://localhost:3001/v1/test_api/400", "GET");
 
-    ApiException exception = assertThrows(ApiException.class, () -> plugin.execute(null));
+    ApiException exception = assertThrows(ApiException.class,
+        () -> plugin.execute(configuration, null));
 
     assertEquals(400, exception.getStatusCode());
     assertEquals("dlvp.error.external.api", exception.getError().key());
@@ -160,9 +161,10 @@ class DynamicListRoutePluginE2ETest {
   @Test
   @DisplayName("test execute: should throw exception on 5xx error")
   void testExecute5xx() {
-    plugin.setConfiguration(buildConfiguration("http://localhost:3001/v1/test_api/500", "GET"));
+    var configuration = buildConfiguration("http://localhost:3001/v1/test_api/500", "GET");
 
-    ApiException exception = assertThrows(ApiException.class, () -> plugin.execute(null));
+    ApiException exception = assertThrows(ApiException.class,
+        () -> plugin.execute(configuration, null));
 
     assertEquals(502, exception.getStatusCode());
     assertEquals("dlvp.error.external.api.unavailable", exception.getError().key());
@@ -171,10 +173,11 @@ class DynamicListRoutePluginE2ETest {
   @Test
   @DisplayName("test execute: should throw exception on invalid JSON response")
   void testExecuteInvalidJson() {
-    plugin.setConfiguration(buildConfiguration(
-        "http://localhost:3001/v1/test_api/invalid-json", "GET"));
+    var configuration = buildConfiguration(
+        "http://localhost:3001/v1/test_api/invalid-json", "GET");
 
-    ApiException exception = assertThrows(ApiException.class, () -> plugin.execute(null));
+    ApiException exception = assertThrows(ApiException.class,
+        () -> plugin.execute(configuration, null));
 
     assertEquals(500, exception.getStatusCode());
     assertEquals("jptp.error.json.parsing", exception.getError().key());
@@ -183,10 +186,10 @@ class DynamicListRoutePluginE2ETest {
   @Test
   @DisplayName("test execute: should return empty page when API returns empty content")
   void testExecuteEmptyContent() {
-    plugin.setConfiguration(buildConfiguration(
-        "http://localhost:3001/v1/test_api/types/empty", "GET"));
+    var configuration = buildConfiguration(
+        "http://localhost:3001/v1/test_api/types/empty", "GET");
 
-    var response = plugin.execute(null);
+    var response = plugin.execute(configuration, null);
 
     assertNotNull(response);
     Page<DynamicListEntry> page = response.getBody();
@@ -203,9 +206,8 @@ class DynamicListRoutePluginE2ETest {
     configuration.addOption("headers",
         Map.of("Content-Type", "application/json"));
     configuration.addOption("body", "{\"filter\":\"\"}");
-    plugin.setConfiguration(configuration);
 
-    var response = plugin.execute(null);
+    var response = plugin.execute(configuration, null);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
@@ -222,9 +224,10 @@ class DynamicListRoutePluginE2ETest {
   @Test
   @DisplayName("test execute: should throw exception on invalid method")
   void testExecuteInvalidMethod() {
-    plugin.setConfiguration(buildConfiguration("http://localhost:3001/v1/test_api/types", "DELETE"));
+    var configuration = buildConfiguration("http://localhost:3001/v1/test_api/types", "DELETE");
 
-    ApiException exception = assertThrows(ApiException.class, () -> plugin.execute(null));
+    ApiException exception = assertThrows(ApiException.class,
+        () -> plugin.execute(configuration, null));
 
     assertEquals(500, exception.getStatusCode());
     assertEquals("error.plugin.default.invalid.option", exception.getError().key());

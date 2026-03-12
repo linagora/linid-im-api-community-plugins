@@ -113,19 +113,25 @@ class DynamicListValidationPluginTest {
   }
 
   @Test
-  @DisplayName("test validate: should return message on null value without making HTTP request")
+  @DisplayName("test validate: should accept null value without making HTTP request")
   void testValidateNullValue() {
     var configuration = buildConfiguration();
 
     var error = plugin.validate(configuration, null);
 
     assertNotNull(error);
-    assertTrue(error.isPresent());
-    assertEquals("error.plugin.dynamicListValidation.invalid.value", error.get().key());
-    assertEquals(
-        Map.of("allowedValues", List.of(), "value", "null"),
-        error.get().context()
-    );
+    assertTrue(error.isEmpty());
+  }
+
+  @Test
+  @DisplayName("test validate: should accept empty string value without making HTTP request")
+  void testValidateEmptyStringValue() {
+    var configuration = buildConfiguration();
+
+    var error = plugin.validate(configuration, "");
+
+    assertNotNull(error);
+    assertTrue(error.isEmpty());
   }
 
   @Test

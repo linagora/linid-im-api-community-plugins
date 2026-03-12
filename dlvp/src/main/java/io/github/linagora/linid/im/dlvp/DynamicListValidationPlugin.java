@@ -98,16 +98,8 @@ public class DynamicListValidationPlugin implements ValidationPlugin, DynamicLis
   public Optional<I18nMessage> validate(
       final ValidationConfiguration configuration, final Object value) {
 
-    if (value == null) {
-      return Optional.of(
-          I18nMessage.of(
-              "error.plugin.dynamicListValidation.invalid.value",
-              Map.of(
-                  "allowedValues", List.of(),
-                  "value", "null"
-              )
-          )
-      );
+    if (value == null || value.toString().isEmpty()) {
+      return Optional.empty();
     }
 
     DynamicListConfiguration dlConfig = mapper.convertValue(

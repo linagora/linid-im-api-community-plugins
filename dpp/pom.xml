@@ -1,0 +1,86 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.github.linagora.linid.im</groupId>
+        <artifactId>linid-im-api-community-plugins</artifactId>
+        <version>0.1.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>dpp</artifactId>
+    <version>0.1.0</version>
+    <name>Database Provider Plugin for linid-im-api</name>
+    <description>A database provider plugin for handling database operations</description>
+    <url>https://github.com/linagora/linid-im-api-community-plugins</url>
+
+    <licenses>
+        <license>
+            <name>GNU Affero General Public License v3.0</name>
+            <url>https://www.gnu.org/licenses/agpl-3.0.html</url>
+            <distribution>repo</distribution>
+            <comments>This project is licensed under the GNU AGPL v3.0</comments>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>Hamilcar31</id>
+            <name>Adrien CERE</name>
+            <email>adrien.cere@gmail.com</email>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/linagora/linid-im-api-community-plugins.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:linagora/linid-im-api-community-plugins.git</developerConnection>
+        <url>https://github.com/linagora/linid-im-api-community-plugins</url>
+    </scm>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+            <version>7.0.6</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jooq</groupId>
+            <artifactId>jooq</artifactId>
+            <version>3.20.11</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>7.0.2</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.10</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+            <version>2.21.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.hubspot.jinjava</groupId>
+            <artifactId>jinjava</artifactId>
+            <version>2.8.3</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+</project>

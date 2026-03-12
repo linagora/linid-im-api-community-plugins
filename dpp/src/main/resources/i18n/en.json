@@ -1,0 +1,11 @@
+{
+  "dpp.error.missingPrimaryKey": "No primary key attribute configured for entity.",
+  "dpp.error.no-primary": "No primary key attribute configured for entity.",
+  "dpp.error.select": "Error SELECT on tableName '{{tableName}}': {{message}}",
+  "dpp.error.selectOne": "Error SELECT ONE on tableName '{{tableName}}': {{message}}",
+  "dpp.error.insert": "Error INSERT on tableName '{{tableName}}': {{message}}",
+  "dpp.error.update": "Error UPDATE on tableName '{{tableName}}': {{message}}",
+  "dpp.error.delete": "Error DELETE on tableName '{{tableName}}': {{message}}",
+  "dpp.error.record.notFound": "Error: no record found in table '{{tableName}}' with id '{{id}}'.",
+  "dpp.error.patch": "Error PATCH on tableName '{{tableName}}': {{message}}"
+}

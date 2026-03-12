@@ -1,0 +1,37 @@
+name: users
+provider: POSTGRES
+tasks:
+access:
+  create:
+    table: test_table_1
+  update:
+    table: test_table_1
+  delete:
+    table: test_table_1
+  findAll:
+    table: test_table_1
+  patch:
+    table: test_table_1
+  findById:
+    table: test_table_1
+attributes:
+  - name: id
+    type: Integer
+    required: true
+    access:
+      primaryKey: true
+      column: id
+  - name: userName
+    access:
+      column: name
+  - name: userEmail
+    access:
+      column: email
+  - name: age
+    type: Integer
+    access:
+      column: age
+  - name: isValid
+    type: Boolean
+    access:
+      column: is_valid

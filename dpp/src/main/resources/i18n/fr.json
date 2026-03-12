@@ -1,0 +1,10 @@
+{
+  "dpp.error.noPrimary": "Aucune clé primaire n'est configurée pour l'entité.",
+  "dpp.error.select": "Erreur SELECT sur la table '{{tableName}}' : {{message}}",
+  "dpp.error.selectOne": "Erreur SELECT ONE sur la table '{{tableName}}' : {{message}}",
+  "dpp.error.insert": "Erreur INSERT sur la table '{{tableName}}' : {{message}}",
+  "dpp.error.update": "Erreur UPDATE sur la table '{{tableName}}' : {{message}}",
+  "dpp.error.delete": "Erreur DELETE sur la table '{{tableName}}' : {{message}}",
+  "dpp.error.record.notFound": "Erreur: aucun enregistrement trouvé dans la table '{{tableName}}' avec l'id '{{id}}'.",
+  "dpp.error.patch": "Erreur PATCH sur la table '{{tableName}}' : {{message}}"
+}

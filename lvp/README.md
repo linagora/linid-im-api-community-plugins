@@ -68,11 +68,12 @@ This will validate that the value is one of: `ACTIVE`, `INACTIVE`, `SUSPENDED` o
 * The plugin retrieves the value to validate from the context (as defined by the hosting engine).
 * It checks whether the value is present in the configured `allowedValues` list.
 * The comparison is **case-sensitive**.
-* If the value is `null` or not found in the list, a validation error is returned.
+* If the value is not in the list, a validation error is returned.
+* If the value is null or an empty string no error is returned, this checks should be done by the `RequiredValidationPlugin` if needed.
 
 ## 🧷 Notes
 
 * All values in the `allowedValues` array are treated as strings.
 * The validation is **case-sensitive** (e.g., `"ACTIVE"` ≠ `"active"`).
 * If the `allowedValues` option is missing or invalid, a configuration error will be raised at startup.
-* `null` values and empty strings are rejected by the validation.
+* `null` values and empty strings are accepted by the validation.

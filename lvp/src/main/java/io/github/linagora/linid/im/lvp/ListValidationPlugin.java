@@ -66,6 +66,10 @@ public class ListValidationPlugin implements ValidationPlugin {
 
     Map<String, Object> options = configuration.getOptions();
 
+    if (value == null || value.toString().isEmpty()) {
+      return Optional.empty();
+    }
+
     if (!options.containsKey(ALLOWED_VALUES)) {
       throw new ApiException(
           500,
@@ -84,7 +88,7 @@ public class ListValidationPlugin implements ValidationPlugin {
             )
         ));
 
-    if (value == null || !allowedValues.contains(value.toString())) {
+    if (!allowedValues.contains(value.toString())) {
       return Optional.of(I18nMessage.of("error.plugin.listValidation.invalid.value"));
     }
 

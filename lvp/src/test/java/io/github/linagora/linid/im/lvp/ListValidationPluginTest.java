@@ -56,7 +56,7 @@ public class ListValidationPluginTest {
     var configuration = new ValidationConfiguration();
 
     ApiException exception =
-        assertThrows(ApiException.class, () -> plugin.validate(configuration, ""));
+        assertThrows(ApiException.class, () -> plugin.validate(configuration, "test"));
 
     assertEquals(500, exception.getStatusCode());
     assertEquals("error.plugin.default.missing.option", exception.getError().key());
@@ -70,7 +70,7 @@ public class ListValidationPluginTest {
     var configuration = new ValidationConfiguration();
     configuration.addOption("allowedValues", "invalid");
     ApiException exception =
-        assertThrows(ApiException.class, () -> plugin.validate(configuration, ""));
+        assertThrows(ApiException.class, () -> plugin.validate(configuration, "test"));
 
     assertEquals(500, exception.getStatusCode());
     assertEquals("error.plugin.default.invalid.option", exception.getError().key());
@@ -78,31 +78,27 @@ public class ListValidationPluginTest {
   }
 
   @Test
-  @DisplayName("test validate: should return message on null value")
+  @DisplayName("test validate: should accept null value")
   void testValidateNullValue() {
     var plugin = new ListValidationPlugin();
     var configuration = new ValidationConfiguration();
-    configuration.addOption("allowedValues", new String[] {"TEST"});
 
     var error = plugin.validate(configuration, null);
 
     assertNotNull(error);
-    assertTrue(error.isPresent());
-    assertEquals("error.plugin.listValidation.invalid.value", error.get().key());
+    assertTrue(error.isEmpty());
   }
 
   @Test
-  @DisplayName("test validate: should return message on empty string value")
+  @DisplayName("test validate: should accept empty string value")
   void testValidateEmptyStringValue() {
     var plugin = new ListValidationPlugin();
     var configuration = new ValidationConfiguration();
-    configuration.addOption("allowedValues", new String[] {"TEST"});
 
     var error = plugin.validate(configuration, "");
 
     assertNotNull(error);
-    assertTrue(error.isPresent());
-    assertEquals("error.plugin.listValidation.invalid.value", error.get().key());
+    assertTrue(error.isEmpty());
   }
 
   @Test

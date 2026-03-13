@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - add dynamic list route plugin
 - add HTTP service for external API requests
 
+### Fixed
+
+- skip validation for null and empty values
+
 ### Changed
 
 - add GitHub Actions workflow for pull requests

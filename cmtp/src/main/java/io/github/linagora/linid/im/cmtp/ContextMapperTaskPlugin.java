@@ -26,7 +26,6 @@
 
 package io.github.linagora.linid.im.cmtp;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import io.github.linagora.linid.im.corelib.plugin.config.JinjaService;
 import io.github.linagora.linid.im.corelib.plugin.config.dto.TaskConfiguration;
 import io.github.linagora.linid.im.corelib.plugin.entity.DynamicEntity;
@@ -38,6 +37,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.type.TypeReference;
 
 /**
  * Task plugin that maps context values from one or more input keys to one or more output keys.

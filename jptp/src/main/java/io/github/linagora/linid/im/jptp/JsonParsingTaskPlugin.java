@@ -26,9 +26,6 @@
 
 package io.github.linagora.linid.im.jptp;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import io.github.linagora.linid.im.corelib.plugin.config.dto.TaskConfiguration;
@@ -38,6 +35,9 @@ import io.github.linagora.linid.im.corelib.plugin.task.TaskPlugin;
 import java.util.Map;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Task plugin that parses a JSON string from the execution context.
@@ -80,7 +80,7 @@ public class JsonParsingTaskPlugin implements TaskPlugin {
     try {
       Object parsed = mapper.readValue(json, new TypeReference<Object>() {});
       context.put(destination, parsed);
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       throw new ApiException(500, I18nMessage.of("jptp.error.json.parsing",
           Map.of("source", source)));
     }

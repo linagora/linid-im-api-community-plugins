@@ -26,7 +26,6 @@
 
 package io.github.linagora.linid.im.dlvp;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import io.github.linagora.linid.im.corelib.plugin.config.JinjaService;
 import io.github.linagora.linid.im.corelib.plugin.config.dto.EntityConfiguration;
 import io.github.linagora.linid.im.corelib.plugin.config.dto.PluginConfiguration;
@@ -35,6 +34,8 @@ import io.github.linagora.linid.im.corelib.plugin.entity.DynamicEntity;
 import io.github.linagora.linid.im.corelib.plugin.task.TaskExecutionContext;
 import io.github.linagora.linid.im.dlvp.model.DynamicListConfiguration;
 import io.github.linagora.linid.im.dlvp.model.DynamicListEntry;
+import tools.jackson.core.type.TypeReference;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

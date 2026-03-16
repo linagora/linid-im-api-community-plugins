@@ -1,4 +1,11 @@
-# 🌐 HttpProviderPlugin
+# 🌐 Http Plugin (hpp)
+
+The `hpp` module provides HTTP-related plugins for LinID. It currently includes:
+
+- **HttpProviderPlugin**: A provider plugin for CRUD operations over HTTP REST APIs with response mapping into dynamic entities.
+- **HttpTaskPlugin**: A task plugin for executing HTTP requests within task lifecycles.
+
+## HttpProviderPlugin
 
 The `HttpProviderPlugin` is a provider plugin designed to interact with configurable HTTP REST APIs, supporting full CRUD operations and response mapping into dynamic entities.
 
@@ -101,7 +108,7 @@ entities:
 ### Configuration Fields
 
 | Key                                   | Required | Description                                                                                  |
-| ------------------------------------- | -------- |----------------------------------------------------------------------------------------------|
+| ------------------------------------- | -------- | -------------------------------------------------------------------------------------------- |
 | `baseUrl`                             | ✅       | Base URL of the HTTP API                                                                     |
 | `headers`                             | ❌       | Optional HTTP headers (e.g., `Content-Type`, `Authorization`)                                |
 | `disabledRoutes`                      | ❌       | List of disabled actions for the entity (e.g., `patch`, `findAll`)                           |
@@ -113,7 +120,6 @@ entities:
 | `result`                              | ❌       | Expression evaluated to verify success (e.g., for `delete`)                                  |
 | `page`, `size`, `total`, `itemsCount` | ❌       | Pagination info for `findAll`; mapping can use `index` for iterating items.                  |
 
-
 Voici un encadré clair que tu peux insérer dans ton README pour indiquer que **PATCH n’est plus supporté** :
 
 ---
@@ -122,9 +128,9 @@ Voici un encadré clair que tu peux insérer dans ton README pour indiquer que *
 
 The `HttpProviderPlugin` **does not support the PATCH method**.
 
-* Any configuration or task using `PATCH` will **throw an exception** if invoked.
-* Use `POST` for creation or `PUT` for updates instead.
-* Ensure that `patch` is included in `disabledRoutes` for your entities to prevent accidental usage:
+- Any configuration or task using `PATCH` will **throw an exception** if invoked.
+- Use `POST` for creation or `PUT` for updates instead.
+- Ensure that `patch` is included in `disabledRoutes` for your entities to prevent accidental usage:
 
 ```yaml
 entities:
@@ -134,7 +140,7 @@ entities:
     disabledRoutes: ['patch']
 ```
 
-* If you previously relied on PATCH for partial updates, you should migrate your logic to use full `PUT` updates or a custom workflow.
+- If you previously relied on PATCH for partial updates, you should migrate your logic to use full `PUT` updates or a custom workflow.
 
 This explicitly prevents runtime errors and ensures consistency across all entity operations.
 
@@ -181,6 +187,66 @@ This `json-parsing` task (from the jptp plugin) converts raw HTTP responses into
 - If a route is declared in `disabledRoutes`, the plugin ignores any corresponding `access` configuration.
 - The `findAll` entity mapping must always use an `index` parameter to iterate over the response items.
 - The plugin naturally integrates with the task engine to allow customized processing on responses.
+
+---
+
+## HttpTaskPlugin
+
+The `HttpTaskPlugin` is a task plugin that executes HTTP requests defined in task configuration. It allows performing HTTP calls at any point in the task lifecycle.
+
+### ✅ Use Case
+
+Use this plugin when you need to:
+
+- Execute an HTTP call as a side-effect during entity processing (e.g., notify an external system).
+- Fetch data from an external API and store it in the execution context for subsequent tasks.
+- Chain HTTP calls with other task plugins (e.g., `json-parsing`, `context-mapping`).
+
+### 🔧 Configuration
+
+```yaml
+tasks:
+  - type: http
+    name: call-external-api
+    url: 'http://example.com/api/resource'
+    method: 'POST'
+    headers:
+      Content-Type: application/json
+    body: '{"key": "{{ entity.value }}"}'
+    phases: ['beforeCreate']
+```
+
+### Configuration Fields
+
+| Key       | Required | Description                                       |
+| --------- | -------- | ------------------------------------------------- |
+| `url`     | ✅       | Full URL to call (supports Jinja templating)      |
+| `method`  | ✅       | HTTP method (`GET`, `POST`, `PUT`, `DELETE`)      |
+| `headers` | ❌       | Optional HTTP headers (e.g., `Content-Type`)      |
+| `body`    | ❌       | Optional request body (supports Jinja templating) |
+
+### 🛠 Behavior
+
+- The plugin executes the configured HTTP request.
+- The raw HTTP response is stored in the execution context under the key `response`.
+- The `url` and `body` fields support Jinja templating, allowing dynamic values based on entity attributes and context.
+- HTTP errors (4xx, 5xx) throw an `ApiException` with the corresponding `hpp.error*` i18n key.
+
+### Example: Chaining with json-parsing
+
+```yaml
+tasks:
+  - type: http
+    name: fetch-data
+    url: 'http://api.example.com/data/{{ context.id }}'
+    method: GET
+    phases: ['beforeResponseMappingFindById']
+  - type: json-parsing
+    name: parse-data
+    source: response
+    destination: response
+    phases: ['beforeResponseMappingFindById']
+```
 
 ---
 

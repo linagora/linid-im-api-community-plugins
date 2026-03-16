@@ -24,50 +24,52 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.hpp.service;
+package io.github.linagora.linid.im.hpp;
 
-import io.github.linagora.linid.im.corelib.plugin.config.dto.PluginConfiguration;
-import io.github.linagora.linid.im.corelib.plugin.config.dto.ProviderConfiguration;
+import io.github.linagora.linid.im.corelib.plugin.config.dto.TaskConfiguration;
 import io.github.linagora.linid.im.corelib.plugin.entity.DynamicEntity;
 import io.github.linagora.linid.im.corelib.plugin.task.TaskExecutionContext;
-import io.github.linagora.linid.im.hpp.model.EndpointConfiguration;
+import io.github.linagora.linid.im.corelib.plugin.task.TaskPlugin;
+import io.github.linagora.linid.im.hpp.service.HttpService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Component;
 
 /**
- * Service for performing HTTP requests in a dynamic and configurable way.
+ * Task plugin that executes HTTP requests defined in task configuration.
  *
- * <p>This service abstracts the execution of HTTP calls based on dynamic runtime context,
- * provider configuration, and endpoint configuration. It supports templated input using engines like Jinjava.
+ * <p>This plugin delegates to {@link HttpService} which reads {@code url}, {@code method},
+ * and optionally {@code body} and {@code headers} from the task configuration options,
+ * performs the HTTP request, and the raw response is stored in the execution context
+ * under the key {@code "response"}.
  */
-public interface HttpService {
+@Component
+public class HttpTaskPlugin implements TaskPlugin {
+
+  private static final String RESPONSE = "response";
+
+  private final HttpService httpService;
 
   /**
-   * Executes an HTTP request based on the provided context and provider/endpoint configurations.
+   * Default constructor.
    *
-   * @param context the current execution context of the task; may contain runtime variables
-   * @param configuration the global provider configuration (e.g., headers, base URL, credentials)
-   * @param endpointConfiguration the specific endpoint configuration (URI, method, body, mappings, etc.)
-   * @param action a symbolic name or type of action being performed (e.g., "get", "delete")
-   * @param entity the entity involved in the request; used for templating and payload generation
-   * @return the raw response body as a {@link String}
+   * @param httpService Service responsible for performing HTTP requests.
    */
-  String request(TaskExecutionContext context,
-                 ProviderConfiguration configuration,
-                 EndpointConfiguration endpointConfiguration,
-                 String action,
-                 DynamicEntity entity);
+  @Autowired
+  public HttpTaskPlugin(final HttpService httpService) {
+    this.httpService = httpService;
+  }
 
-  /**
-   * Executes an HTTP request based on a plugin configuration.
-   *
-   * <p>This method extracts {@code url}, {@code method}, {@code body}, and {@code headers} from the
-   * given configuration. The URL and body support Jinja templating.
-   *
-   * @param context the current execution context; may contain runtime variables for templating
-   * @param entity the entity involved in the request; used for templating
-   * @param configuration the plugin configuration containing url, method, body, and optional headers
-   * @return the raw response body as a {@link String}
-   */
-  String request(TaskExecutionContext context,
-                 DynamicEntity entity,
-                 PluginConfiguration configuration);
+  @Override
+  public boolean supports(final @NonNull String type) {
+    return "http".equalsIgnoreCase(type);
+  }
+
+  @Override
+  public void execute(final TaskConfiguration configuration,
+                      final DynamicEntity entity,
+                      final TaskExecutionContext context) {
+    String response = httpService.request(context, entity, configuration);
+    context.put(RESPONSE, response);
+  }
 }

@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- lint pom.xml to force new library release
 - lint to force new library release
 - handle null value in validate method
 - add minimal example for regex plugin

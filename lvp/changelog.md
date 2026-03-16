@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- lint to force new library release
 - skip validation for null and empty values
 - remove useless context for error message
 

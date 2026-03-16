@@ -13,13 +13,14 @@ Each plugin is maintained in a dedicated subdirectory and follows the same struc
 | Name   | Description                                                               |
 | ------ | ------------------------------------------------------------------------- |
 | `cmtp` | Task plugin to copy and transform context values using Jinjava templates. |
+| `hpp`  | Task plugin to execute configurable HTTP requests within task lifecycles. |
 | `jptp` | Task plugin to parse a JSON string from the context.                      |
 
 ### **📦 Provider plugins**
 
-| Name  | Description                                                                   |
-| ----- | ----------------------------------------------------------------------------- |
-| `hpp` | Provider plugin to interact with configurable HTTP REST APIs (CRUD, mapping). |
+| Name  | Description                                                                                    |
+| ----- | ---------------------------------------------------------------------------------------------- |
+| `hpp` | Provider plugin to interact with configurable HTTP REST APIs (CRUD, mapping, Jinja rendering). |
 
 ### **🧩 Validation Plugins**
 

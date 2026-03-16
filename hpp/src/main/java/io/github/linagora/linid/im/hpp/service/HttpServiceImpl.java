@@ -29,6 +29,7 @@ package io.github.linagora.linid.im.hpp.service;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import io.github.linagora.linid.im.corelib.plugin.config.JinjaService;
+import io.github.linagora.linid.im.corelib.plugin.config.dto.PluginConfiguration;
 import io.github.linagora.linid.im.corelib.plugin.config.dto.ProviderConfiguration;
 import io.github.linagora.linid.im.corelib.plugin.entity.DynamicEntity;
 import io.github.linagora.linid.im.corelib.plugin.task.TaskExecutionContext;
@@ -47,9 +48,11 @@ import org.springframework.web.client.RestTemplate;
 import tools.jackson.core.type.TypeReference;
 
 /**
- * HTTP service implementation responsible for executing dynamic HTTP requests based on provider and endpoint configurations.
+ * HTTP service implementation responsible for executing dynamic HTTP requests based on provider and endpoint
+ * configurations.
  *
- * <p>Supports URI, method, headers, and body templating via Jinja (Jinjava), and handles HTTP status errors with custom exceptions.
+ * <p>Supports URI, method, headers, and body templating via Jinja (Jinjava), and handles HTTP status errors with
+ * custom exceptions.
  */
 @Service
 public class HttpServiceImpl implements HttpService {
@@ -64,12 +67,14 @@ public class HttpServiceImpl implements HttpService {
   private final RestTemplate restTemplate;
 
   private static final String MISSING_OPTION = "error.plugin.default.missing.option";
+  private static final String INVALID_OPTION = "error.plugin.default.invalid.option";
   private static final String OPTION = "option";
 
   /**
    * Default constructor.
    *
-   * @param jinjaService Service used to render Jinja templates within URIs, request bodies, headers, and response mappings.
+   * @param jinjaService Service used to render Jinja templates within URIs, request bodies, headers, and response
+   *                     mappings.
    */
   @Autowired
   public HttpServiceImpl(final JinjaService jinjaService) {
@@ -101,6 +106,52 @@ public class HttpServiceImpl implements HttpService {
             I18nMessage.of(MISSING_OPTION, Map.of(OPTION, String.format("access.%s.method", action)))
         ));
 
+    String templatedBody = Optional.ofNullable(endpointConfiguration.getBody()).orElse("");
+    String body = jinjaService.render(context, entity, templatedBody);
+    String uri = jinjaService.render(context, entity, String.format("%s%s", baseUrl, endpoint));
+
+    return executeRequest(uri, method, body, Map.copyOf(headersMap), String.format("access.%s.method", action));
+  }
+
+  @Override
+  public String request(TaskExecutionContext context,
+                        DynamicEntity entity,
+                        PluginConfiguration configuration) {
+    String url = configuration.getOption("url")
+        .orElseThrow(() -> new ApiException(
+            500,
+            I18nMessage.of(MISSING_OPTION, Map.of(OPTION, "url"))
+        ));
+    String method = configuration.getOption("method")
+        .orElseThrow(() -> new ApiException(
+            500,
+            I18nMessage.of(MISSING_OPTION, Map.of(OPTION, "method"))
+        ));
+    String body = configuration.getOption("body").orElse("");
+    var headersMap = configuration.getOption("headers", new TypeReference<Map<String, String>>() {
+    }).orElse(Map.of());
+
+    String renderedUrl = jinjaService.render(context, entity, url);
+    String renderedBody = jinjaService.render(context, entity, body);
+
+    return executeRequest(renderedUrl, method, renderedBody, Map.copyOf(headersMap), "method");
+  }
+
+  /**
+   * Executes an HTTP request with the given parameters.
+   *
+   * @param uri the fully resolved URI to call
+   * @param method the HTTP method name (GET, POST, PUT, DELETE)
+   * @param body the request body (ignored for GET and DELETE)
+   * @param headersMap optional HTTP headers to include in the request
+   * @param methodOptionName the option name used in error messages for invalid method
+   * @return the raw response body as a {@link String}
+   */
+  public String executeRequest(String uri,
+                                String method,
+                                String body,
+                                Map<String, String> headersMap,
+                                String methodOptionName) {
     HttpMethod httpMethod = switch (Strings.toRootUpperCase(method)) {
       case "GET" -> HttpMethod.GET;
       case "POST" -> HttpMethod.POST;
@@ -108,16 +159,12 @@ public class HttpServiceImpl implements HttpService {
       case "DELETE" -> HttpMethod.DELETE;
       default -> throw new ApiException(
           500,
-          I18nMessage.of("error.plugin.default.invalid.option", Map.of(
-              OPTION, String.format("access.%s.method", action),
+          I18nMessage.of(INVALID_OPTION, Map.of(
+              OPTION, methodOptionName,
               "value", method
           ))
       );
     };
-
-    String templatedBody = Optional.ofNullable(endpointConfiguration.getBody()).orElse("");
-    String body = jinjaService.render(context, entity, templatedBody);
-    String uri = jinjaService.render(context, entity, String.format("%s%s", baseUrl, endpoint));
 
     HttpHeaders headers = new HttpHeaders();
     headersMap.forEach(headers::add);

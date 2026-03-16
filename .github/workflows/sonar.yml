@@ -24,7 +24,7 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Start fake HTTP server for http-provider
+      - name: Start fake HTTP server for http-plugin
         working-directory: hpp/src/test/fake-http-server
         run: |
           npm install

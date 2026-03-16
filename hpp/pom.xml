@@ -10,8 +10,8 @@
   <groupId>io.github.linagora.linid.im</groupId>
   <artifactId>hpp</artifactId>
   <version>0.2.2</version>
-  <name>http-provider</name>
-  <description>Plugin to manage http provider</description>
+  <name>http-plugin</name>
+  <description>Plugin for HTTP provider and task operations</description>
   <url>https://github.com/linagora/linid-im-api-community-plugins</url>
   <licenses>
     <license>

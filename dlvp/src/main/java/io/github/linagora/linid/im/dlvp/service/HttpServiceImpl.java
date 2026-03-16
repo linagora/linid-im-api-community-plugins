@@ -26,7 +26,6 @@
 
 package io.github.linagora.linid.im.dlvp.service;
 
-import tools.jackson.core.type.TypeReference;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import io.github.linagora.linid.im.corelib.plugin.config.JinjaService;
@@ -39,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import tools.jackson.core.type.TypeReference;
 
 /**
  * Implementation of {@link HttpService} that executes HTTP requests to external APIs.

@@ -34,11 +34,10 @@ import io.github.linagora.linid.im.corelib.plugin.entity.DynamicEntity;
 import io.github.linagora.linid.im.corelib.plugin.task.TaskExecutionContext;
 import io.github.linagora.linid.im.dlvp.model.DynamicListConfiguration;
 import io.github.linagora.linid.im.dlvp.model.DynamicListEntry;
-import tools.jackson.core.type.TypeReference;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import tools.jackson.core.type.TypeReference;
 
 /**
  * Shared support interface for Dynamic List plugins.

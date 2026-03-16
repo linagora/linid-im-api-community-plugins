@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- netty support for new version
 - add translations for regex validation plugin
 - add new plugin regex-validation
 

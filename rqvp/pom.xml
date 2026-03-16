@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>io.github.linagora.linid.im</groupId>
@@ -8,7 +9,7 @@
   </parent>
   <groupId>io.github.linagora.linid.im</groupId>
   <artifactId>rqvp</artifactId>
-  <version>0.1.2</version>
+  <version>0.2.0</version>
   <name>Required Validation Plugin for linid-im-api</name>
   <description>A plugin to validate required fields</description>
   <url>https://github.com/linagora/linid-im-api-community-plugins</url>

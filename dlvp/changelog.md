@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- netty support for new version
 - adapt DynamicListRoutePlugin to stateless RoutePlugin interface
 - replace elementValue with elementMapping
 - add dynamic list validation plugin

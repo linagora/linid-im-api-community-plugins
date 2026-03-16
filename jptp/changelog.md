@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - add json parsing task plugin
 
+### Fixed
+
+- lint to force new library release
+
 ### Changed
 
 - add GitHub Actions workflow for pull requests

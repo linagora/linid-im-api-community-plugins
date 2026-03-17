@@ -10,10 +10,11 @@ Each plugin is maintained in a dedicated subdirectory and follows the same struc
 
 ### **📦 Task plugins**
 
-| Name   | Description                                                               |
-| ------ | ------------------------------------------------------------------------- |
-| `cmtp` | Task plugin to copy and transform context values using Jinjava templates. |
-| `jptp` | Task plugin to parse a JSON string from the context.                      |
+| Name   | Description                                                                     |
+| ------ | ------------------------------------------------------------------------------- |
+| `cmtp` | Task plugin to copy and transform context values using Jinjava templates.       |
+| `ccvp` | Task plugin to validate context values by comparing pairs from Jinja templates. |
+| `jptp` | Task plugin to parse a JSON string from the context.                            |
 
 ### **📦 Provider plugins**
 

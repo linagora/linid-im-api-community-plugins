@@ -40,9 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
@@ -76,7 +74,7 @@ public class HttpServiceImpl implements HttpService {
   @Autowired
   public HttpServiceImpl(final JinjaService jinjaService) {
     this.jinjaService = jinjaService;
-    this.restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+    this.restTemplate = new RestTemplate();
   }
 
   @Override
@@ -107,7 +105,6 @@ public class HttpServiceImpl implements HttpService {
       case "GET" -> HttpMethod.GET;
       case "POST" -> HttpMethod.POST;
       case "PUT" -> HttpMethod.PUT;
-      case "PATCH" -> HttpMethod.PATCH;
       case "DELETE" -> HttpMethod.DELETE;
       default -> throw new ApiException(
           500,

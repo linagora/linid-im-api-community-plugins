@@ -35,9 +35,15 @@ import io.github.linagora.linid.im.corelib.plugin.task.TaskExecutionContext;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestTemplate;
 import tools.jackson.core.type.TypeReference;
 
 /**
@@ -62,8 +68,8 @@ public class HttpServiceImpl implements HttpService {
   /** Service responsible for rendering Jinja templates for URL and request body. */
   private final JinjaService jinjaService;
 
-  /** Reusable HTTP client for executing requests. */
-  private final WebClient webClient;
+  /** HTTP client for executing requests. */
+  private final RestTemplate restTemplate;
 
   /**
    * Default constructor.
@@ -73,7 +79,7 @@ public class HttpServiceImpl implements HttpService {
   @Autowired
   public HttpServiceImpl(final JinjaService jinjaService) {
     this.jinjaService = jinjaService;
-    this.webClient = WebClient.create();
+    this.restTemplate = new RestTemplate();
   }
 
   @Override
@@ -88,7 +94,7 @@ public class HttpServiceImpl implements HttpService {
             500,
             I18nMessage.of(MISSING_OPTION, Map.of(OPTION, "method"))
         ));
-    Map<String, String> headers = configuration
+    Map<String, String> headersMap = configuration
         .getOption("headers", new TypeReference<Map<String, String>>() {
         }).orElse(Map.of());
     String templatedBody = configuration.getOption("body").orElse("");
@@ -97,42 +103,45 @@ public class HttpServiceImpl implements HttpService {
     String renderedUrl = jinjaService.render(context, emptyEntity, url);
     String renderedBody = jinjaService.render(context, emptyEntity, templatedBody);
 
-    WebClient.RequestHeadersSpec<?> request;
+    HttpHeaders headers = new HttpHeaders();
+    headersMap.forEach(headers::add);
 
-    if ("GET".equalsIgnoreCase(method)) {
-      request = webClient.get().uri(renderedUrl);
-    } else if ("POST".equalsIgnoreCase(method)) {
-      request = webClient.post().uri(renderedUrl)
-          .bodyValue(renderedBody);
-    } else {
-      throw new ApiException(500, I18nMessage.of(
-          INVALID_OPTION,
-          Map.of(OPTION, "method", "value", method)
-      ));
+    HttpEntity<String> entity = new HttpEntity<>(renderedBody, headers);
+
+    try {
+      ResponseEntity<String> response;
+
+      if ("GET".equalsIgnoreCase(method)) {
+        response = restTemplate.exchange(renderedUrl, HttpMethod.GET, new HttpEntity<>(headers), String.class);
+      } else if ("POST".equalsIgnoreCase(method)) {
+        response = restTemplate.exchange(renderedUrl, HttpMethod.POST, entity, String.class);
+      } else {
+        throw new ApiException(500, I18nMessage.of(
+            INVALID_OPTION,
+            Map.of(OPTION, "method", "value", method)
+        ));
+      }
+
+      return response.getBody();
+    } catch (HttpStatusCodeException ex) {
+      HttpStatusCode status = ex.getStatusCode();
+      String responseBody = ex.getResponseBodyAsString();
+
+      if (status.is4xxClientError()) {
+        throw new ApiException(
+            status.value(),
+            I18nMessage.of("dlvp.error.external.api"),
+            Map.of("body", responseBody)
+        );
+      } else if (status.is5xxServerError()) {
+        throw new ApiException(
+            502,
+            I18nMessage.of("dlvp.error.external.api.unavailable"),
+            Map.of("body", responseBody)
+        );
+      } else {
+        throw ex;
+      }
     }
-
-    return request
-        .headers(httpHeaders -> headers.forEach(httpHeaders::add))
-        .retrieve()
-        .onStatus(
-            HttpStatusCode::is4xxClientError,
-            clientResponse -> clientResponse.bodyToMono(String.class)
-                .map(errorBody -> new ApiException(
-                    clientResponse.statusCode().value(),
-                    I18nMessage.of("dlvp.error.external.api"),
-                    Map.of("body", errorBody)
-                ))
-        )
-        .onStatus(
-            HttpStatusCode::is5xxServerError,
-            clientResponse -> clientResponse.bodyToMono(String.class)
-                .map(errorBody -> new ApiException(
-                    502,
-                    I18nMessage.of("dlvp.error.external.api.unavailable"),
-                    Map.of("body", errorBody)
-                ))
-        )
-        .bodyToMono(String.class)
-        .block();
   }
 }

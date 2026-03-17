@@ -38,11 +38,6 @@
   </properties>
   <dependencies>
     <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-webflux</artifactId>
-      <version>7.0.6</version>
-    </dependency>
-    <dependency>
       <groupId>io.github.linagora.linid.im</groupId>
       <artifactId>jptp</artifactId>
       <version>0.1.0</version>

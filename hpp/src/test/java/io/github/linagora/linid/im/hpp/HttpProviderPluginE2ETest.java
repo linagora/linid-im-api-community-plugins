@@ -296,16 +296,12 @@ class HttpProviderPluginE2ETest {
     entity.setConfiguration(entityConfiguration);
     entity.setAttributes(attributes);
 
-    var result = provider.patch(context, providerConfiguration, "1", entity);
+    ApiException exception = assertThrows(ApiException.class, () -> {
+      provider.patch(context, providerConfiguration, "1", entity);
+    });
 
-    assertNotNull(result);
-    assertNotNull(result.getAttributes());
-    assertEquals(5, result.getAttributes().size());
-    assertEquals("1", result.getAttributes().get("id1"));
-    assertEquals("John", result.getAttributes().get("firstname1"));
-    assertEquals("Doe", result.getAttributes().get("lastname1"));
-    assertEquals("john.patch@gmail.com", result.getAttributes().get("email1"));
-    assertEquals("updated", result.getAttributes().get("status1"));
+    assertNotNull(exception);
+    assertEquals("error.plugin.default.invalid.option", exception.getMessage());
   }
 
   @Test

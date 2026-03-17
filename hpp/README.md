@@ -101,17 +101,42 @@ entities:
 ### Configuration Fields
 
 | Key                                   | Required | Description                                                                                  |
-| ------------------------------------- | -------- | -------------------------------------------------------------------------------------------- |
+| ------------------------------------- | -------- |----------------------------------------------------------------------------------------------|
 | `baseUrl`                             | ✅       | Base URL of the HTTP API                                                                     |
 | `headers`                             | ❌       | Optional HTTP headers (e.g., `Content-Type`, `Authorization`)                                |
 | `disabledRoutes`                      | ❌       | List of disabled actions for the entity (e.g., `patch`, `findAll`)                           |
 | `access`                              | ❌       | Specific configuration for each CRUD action (`create`, `update`, `delete`, `findById`, etc.) |
 | `uri`                                 | ✅       | Endpoint URI (supports Jinja templating)                                                     |
-| `method`                              | ✅       | HTTP method (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`)                                        |
+| `method`                              | ✅       | HTTP method (`GET`, `POST`, `PUT`, `DELETE`)                                                 |
 | `body`                                | ❌       | HTTP request body (supports Jinja templating)                                                |
 | `entityMapping`                       | ❌       | Maps fields from the HTTP response to the dynamic entity                                     |
 | `result`                              | ❌       | Expression evaluated to verify success (e.g., for `delete`)                                  |
 | `page`, `size`, `total`, `itemsCount` | ❌       | Pagination info for `findAll`; mapping can use `index` for iterating items.                  |
+
+
+Voici un encadré clair que tu peux insérer dans ton README pour indiquer que **PATCH n’est plus supporté** :
+
+---
+
+## ⚠️ No PATCH Support
+
+The `HttpProviderPlugin` **does not support the PATCH method**.
+
+* Any configuration or task using `PATCH` will **throw an exception** if invoked.
+* Use `POST` for creation or `PUT` for updates instead.
+* Ensure that `patch` is included in `disabledRoutes` for your entities to prevent accidental usage:
+
+```yaml
+entities:
+  - name: user
+    provider: http
+    route: users
+    disabledRoutes: ['patch']
+```
+
+* If you previously relied on PATCH for partial updates, you should migrate your logic to use full `PUT` updates or a custom workflow.
+
+This explicitly prevents runtime errors and ensures consistency across all entity operations.
 
 ## 🛠 Behavior
 

@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- remove webflux dependency
 - lint pom.xml to force new library release
 - lint to force new library release
 - remove check of state in delete endpoint

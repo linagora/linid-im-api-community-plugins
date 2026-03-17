@@ -35,10 +35,17 @@ import io.github.linagora.linid.im.corelib.plugin.task.TaskExecutionContext;
 import io.github.linagora.linid.im.hpp.model.EndpointConfiguration;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatusCode;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestTemplate;
 import tools.jackson.core.type.TypeReference;
 
 /**
@@ -53,6 +60,10 @@ public class HttpServiceImpl implements HttpService {
    * Service responsible for rendering templates using the Jinja templating engine (e.g., Jinjava).
    */
   private final JinjaService jinjaService;
+  /**
+   * Spring's {@link RestTemplate} used to perform synchronous HTTP requests.
+   */
+  private final RestTemplate restTemplate;
 
   private static final String MISSING_OPTION = "error.plugin.default.missing.option";
   private static final String OPTION = "option";
@@ -65,6 +76,7 @@ public class HttpServiceImpl implements HttpService {
   @Autowired
   public HttpServiceImpl(final JinjaService jinjaService) {
     this.jinjaService = jinjaService;
+    this.restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
   }
 
   @Override
@@ -91,53 +103,54 @@ public class HttpServiceImpl implements HttpService {
             I18nMessage.of(MISSING_OPTION, Map.of(OPTION, String.format("access.%s.method", action)))
         ));
 
+    HttpMethod httpMethod = switch (Strings.toRootUpperCase(method)) {
+      case "GET" -> HttpMethod.GET;
+      case "POST" -> HttpMethod.POST;
+      case "PUT" -> HttpMethod.PUT;
+      case "PATCH" -> HttpMethod.PATCH;
+      case "DELETE" -> HttpMethod.DELETE;
+      default -> throw new ApiException(
+          500,
+          I18nMessage.of("error.plugin.default.invalid.option", Map.of(
+              OPTION, String.format("access.%s.method", action),
+              "value", method
+          ))
+      );
+    };
+
     String templatedBody = Optional.ofNullable(endpointConfiguration.getBody()).orElse("");
     String body = jinjaService.render(context, entity, templatedBody);
     String uri = jinjaService.render(context, entity, String.format("%s%s", baseUrl, endpoint));
 
-    WebClient webClient = WebClient.create();
+    HttpHeaders headers = new HttpHeaders();
+    headersMap.forEach(headers::add);
 
-    WebClient.RequestHeadersSpec<?> request;
+    HttpEntity<String> requestEntity;
 
-    if ("POST".equalsIgnoreCase(method)) {
-      request = webClient.post().uri(uri).bodyValue(body);
-    } else if ("PUT".equalsIgnoreCase(method)) {
-      request = webClient.put().uri(uri).bodyValue(body);
-    } else if ("PATCH".equalsIgnoreCase(method)) {
-      request = webClient.patch().uri(uri).bodyValue(body);
-    } else if ("DELETE".equalsIgnoreCase(method)) {
-      request = webClient.delete().uri(uri);
-    } else if ("GET".equalsIgnoreCase(method)) {
-      request = webClient.get().uri(uri);
+    if (httpMethod == HttpMethod.GET || httpMethod == HttpMethod.DELETE) {
+      requestEntity = new HttpEntity<>(headers);
     } else {
-      throw new ApiException(500, I18nMessage.of(
-          "error.plugin.default.invalid.option",
-          Map.of(OPTION, String.format("access.%s.method", action), "value", method)
-      ));
+      requestEntity = new HttpEntity<>(body, headers);
     }
 
-    return request
-        .headers(httpHeaders -> headersMap.forEach(httpHeaders::add))
-        .retrieve()
-        .onStatus(
-            HttpStatusCode::is4xxClientError,
-            clientResponse -> clientResponse.bodyToMono(String.class)
-                .map(errorBody -> new ApiException(
-                    clientResponse.statusCode().value(),
-                    I18nMessage.of(String.format("hpp.error%d", clientResponse.statusCode().value())),
-                    Map.of("body", errorBody)
-                ))
-        )
-        .onStatus(
-            HttpStatusCode::is5xxServerError,
-            clientResponse -> clientResponse.bodyToMono(String.class)
-                .map(errorBody -> new ApiException(
-                    500,
-                    I18nMessage.of("hpp.error500"),
-                    Map.of("body", errorBody)
-                ))
-        )
-        .bodyToMono(String.class)
-        .block();
+    try {
+      ResponseEntity<String> response = restTemplate.exchange(
+          uri,
+          httpMethod,
+          requestEntity,
+          String.class
+      );
+      return response.getBody();
+    } catch (HttpStatusCodeException ex) {
+      int status = ex.getStatusCode().value();
+      String errorKey = status >= 500 ? "hpp.error500" : String.format("hpp.error%d", status);
+      throw new ApiException(
+          status,
+          I18nMessage.of(errorKey),
+          Map.of("body", ex.getResponseBodyAsString())
+      );
+    } catch (Exception ex) {
+      throw new ApiException(500, I18nMessage.of("hpp.error500"), Map.of("exception", ex.getMessage()));
+    }
   }
 }

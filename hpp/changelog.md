@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- rename to http-plugin and add HttpTaskPlugin
 - netty support for new version
 - add new plugin http-provider
 

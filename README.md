@@ -10,11 +10,11 @@ Each plugin is maintained in a dedicated subdirectory and follows the same struc
 
 ### **📦 Task plugins**
 
-| Name   | Description                                                               |
-| ------ | ------------------------------------------------------------------------- |
-| `cmtp` | Task plugin to copy and transform context values using Jinjava templates. |
-| `hpp`  | Task plugin to execute configurable HTTP requests within task lifecycles. |
-| `jptp` | Task plugin to parse a JSON string from the context.                      |
+| Name   | Description                                                                |
+| ------ | -------------------------------------------------------------------------- |
+| `cmtp` | Context plugin: task to map context values + validation to compare values. |
+| `hpp`  | Task plugin to execute configurable HTTP requests within task lifecycles.  |
+| `jptp` | Task plugin to parse a JSON string from the context.                       |
 
 ### **📦 Provider plugins**
 
@@ -26,6 +26,7 @@ Each plugin is maintained in a dedicated subdirectory and follows the same struc
 
 | Name   | Description                                                                                                                                    |
 | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `cmtp` | Validation plugin to compare two context-derived values with optional normalization (trim, ignoreCase).                                        |
 | `rvp`  | Validation plugin to ensure a value matches a regular expression pattern.                                                                      |
 | `rqvp` | Validation plugin to ensure a value is not empty.                                                                                              |
 | `lvp`  | Validation plugin to ensure a value belongs to a predefined list of allowed values.                                                            |

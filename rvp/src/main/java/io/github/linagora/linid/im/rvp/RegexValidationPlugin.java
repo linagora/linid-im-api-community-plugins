@@ -29,6 +29,7 @@ package io.github.linagora.linid.im.rvp;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import io.github.linagora.linid.im.corelib.plugin.config.dto.ValidationConfiguration;
+import io.github.linagora.linid.im.corelib.plugin.task.TaskExecutionContext;
 import io.github.linagora.linid.im.corelib.plugin.validation.ValidationPlugin;
 import java.util.Map;
 import java.util.Optional;
@@ -52,7 +53,8 @@ public class RegexValidationPlugin implements ValidationPlugin {
   }
 
   @Override
-  public Optional<I18nMessage> validate(ValidationConfiguration configuration, Object value) {
+  public Optional<I18nMessage> validate(ValidationConfiguration configuration, Object value,
+      TaskExecutionContext context) {
     var regex = configuration.getOption(PATTERN)
         .orElseThrow(() -> new ApiException(
             500,

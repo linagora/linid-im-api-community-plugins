@@ -96,7 +96,8 @@ public class DynamicListValidationPlugin implements ValidationPlugin, DynamicLis
 
   @Override
   public Optional<I18nMessage> validate(
-      final ValidationConfiguration configuration, final Object value) {
+      final ValidationConfiguration configuration, final Object value,
+      final TaskExecutionContext globalContext) {
 
     if (value == null || value.toString().isEmpty()) {
       return Optional.empty();

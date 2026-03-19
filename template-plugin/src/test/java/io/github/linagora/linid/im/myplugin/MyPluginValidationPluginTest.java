@@ -52,7 +52,7 @@ class MyPluginValidationPluginTest {
   @Test
   @DisplayName("Test validate: should no error message")
   void testValidate() {
-    var error = plugin.validate(null, null);
+    var error = plugin.validate(null, null, null);
 
     assertTrue(error.isEmpty());
   }

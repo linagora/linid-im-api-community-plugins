@@ -56,7 +56,7 @@ class RegexValidationPluginTest {
     var plugin = new RegexValidationPlugin();
     var configuration = new ValidationConfiguration();
 
-    ApiException exception = assertThrows(ApiException.class, () -> plugin.validate(configuration, ""));
+    ApiException exception = assertThrows(ApiException.class, () -> plugin.validate(configuration, "", null));
 
     assertEquals(500, exception.getStatusCode());
     assertEquals("error.plugin.default.missing.option", exception.getError().key());
@@ -70,7 +70,7 @@ class RegexValidationPluginTest {
     var configuration = new ValidationConfiguration();
     configuration.addOption("pattern", "[a-z");
 
-    ApiException exception = assertThrows(ApiException.class, () -> plugin.validate(configuration, ""));
+    ApiException exception = assertThrows(ApiException.class, () -> plugin.validate(configuration, "", null));
 
     assertEquals(500, exception.getStatusCode());
     assertEquals("error.plugin.default.invalid.option", exception.getError().key());
@@ -85,7 +85,7 @@ class RegexValidationPluginTest {
     configuration.addOption("pattern", "[a-z");
     configuration.addOption("insensitive", true);
 
-    ApiException exception = assertThrows(ApiException.class, () -> plugin.validate(configuration, ""));
+    ApiException exception = assertThrows(ApiException.class, () -> plugin.validate(configuration, "", null));
 
     assertEquals(500, exception.getStatusCode());
     assertEquals("error.plugin.default.invalid.option", exception.getError().key());
@@ -99,7 +99,7 @@ class RegexValidationPluginTest {
     var configuration = new ValidationConfiguration();
     configuration.addOption("pattern", "[a-z]{1}");
 
-    var error = plugin.validate(configuration, "A");
+    var error = plugin.validate(configuration, "A", null);
 
     assertNotNull(error);
     assertTrue(error.isPresent());
@@ -114,7 +114,7 @@ class RegexValidationPluginTest {
     var configuration = new ValidationConfiguration();
     configuration.addOption("pattern", "[a-z]{1}");
 
-    var error = plugin.validate(configuration, "a");
+    var error = plugin.validate(configuration, "a", null);
 
     assertNotNull(error);
     assertTrue(error.isEmpty());
@@ -127,7 +127,7 @@ class RegexValidationPluginTest {
     var configuration = new ValidationConfiguration();
     configuration.addOption("pattern", "[a-z]{1}");
 
-    var error = plugin.validate(configuration, null);
+    var error = plugin.validate(configuration, null, null);
 
     assertNotNull(error);
     assertTrue(error.isPresent());
@@ -142,7 +142,7 @@ class RegexValidationPluginTest {
     configuration.addOption("pattern", "[a-z]{1}");
     configuration.addOption("insensitive", true);
 
-    var error = plugin.validate(configuration, "A");
+    var error = plugin.validate(configuration, "A", null);
 
     assertNotNull(error);
     assertTrue(error.isEmpty());

@@ -28,6 +28,7 @@ package io.github.linagora.linid.im.myplugin;
 
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import io.github.linagora.linid.im.corelib.plugin.config.dto.ValidationConfiguration;
+import io.github.linagora.linid.im.corelib.plugin.task.TaskExecutionContext;
 import io.github.linagora.linid.im.corelib.plugin.validation.ValidationPlugin;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +48,8 @@ public class MyPluginValidationPlugin implements ValidationPlugin {
   }
 
   @Override
-  public Optional<I18nMessage> validate(final ValidationConfiguration configuration, final Object value) {
+  public Optional<I18nMessage> validate(final ValidationConfiguration configuration, final Object value,
+      final TaskExecutionContext context) {
     log.info("Validation entity on validation 'MyPlugin'");
     return Optional.empty();
   }

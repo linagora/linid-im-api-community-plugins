@@ -26,53 +26,35 @@
 
 package io.github.linagora.linid.im.myplugin;
 
-import io.github.linagora.linid.im.corelib.plugin.authorization.AbstractAuthorizationPlugin;
-import io.github.linagora.linid.im.corelib.plugin.config.dto.RootConfiguration;
-import io.github.linagora.linid.im.corelib.plugin.entity.DynamicEntity;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import io.github.linagora.linid.im.corelib.plugin.config.dto.AuthenticationConfiguration;
 import io.github.linagora.linid.im.corelib.plugin.task.TaskExecutionContext;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.lang.NonNull;
-import org.springframework.stereotype.Component;
-import org.springframework.util.MultiValueMap;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
-/**
- * MyPlugin authorization javadoc.
- */
-@Slf4j
-@Component
-public class MyPluginAuthorizationPlugin extends AbstractAuthorizationPlugin {
+@DisplayName("Test class: MyPluginAuthenticationPlugin")
+class MyPluginAuthenticationPluginTest {
 
-  @Override
-  public boolean supports(final @NonNull String type) {
-    return "MyPlugin".equals(type);
+  @Test
+  @DisplayName("Test support: should return true only on MyPlugin")
+  void testSupports() {
+    assertTrue(new MyPluginAuthenticationPlugin().supports("MyPlugin"));
+    assertFalse(new MyPluginAuthenticationPlugin().supports("Other"));
   }
 
-  @Override
-  public void updateConfiguration(RootConfiguration configuration) {
-    log.info("Update configuration of 'MyPlugin'");
-  }
+  @Test
+  @DisplayName("Test validateToken: should not throw exception")
+  void testValidateToken() {
+    var request = Mockito.mock(HttpServletRequest.class);
+    var context = new TaskExecutionContext();
 
-  @Override
-  public void validateToken(HttpServletRequest request, TaskExecutionContext context) {
-    log.info("validate token of 'MyPlugin'");
-  }
+    var configuration = new AuthenticationConfiguration();
 
-  @Override
-  public void isAuthorized(HttpServletRequest request, DynamicEntity entity, String action, TaskExecutionContext context) {
-    log.info("validate default authorization of 'MyPlugin'");
-  }
-
-  @Override
-  public void isAuthorized(HttpServletRequest request, DynamicEntity entity, String id, String action,
-                           TaskExecutionContext context) {
-    log.info("validate authorization with id of 'MyPlugin'");
-  }
-
-  @Override
-  public void isAuthorized(HttpServletRequest request, DynamicEntity entity, MultiValueMap<String, String> filters,
-                           String action,
-                           TaskExecutionContext context) {
-    log.info("validate authorization with filters of 'MyPlugin'");
+    assertDoesNotThrow(() -> new MyPluginAuthenticationPlugin().validateToken(configuration, request, context));
   }
 }

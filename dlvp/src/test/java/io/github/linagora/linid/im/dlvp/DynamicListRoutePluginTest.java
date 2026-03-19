@@ -37,9 +37,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.github.linagora.linid.im.corelib.exception.ApiException;
-import io.github.linagora.linid.im.corelib.plugin.authorization.AuthorizationFactory;
-import io.github.linagora.linid.im.corelib.plugin.authorization.AuthorizationPlugin;
+import io.github.linagora.linid.im.corelib.plugin.authentication.AuthenticationFactory;
+import io.github.linagora.linid.im.corelib.plugin.authentication.AuthenticationPlugin;
 import io.github.linagora.linid.im.corelib.plugin.config.JinjaService;
+import io.github.linagora.linid.im.corelib.plugin.config.dto.AuthenticationConfiguration;
 import io.github.linagora.linid.im.corelib.plugin.config.dto.PluginConfiguration;
 import io.github.linagora.linid.im.corelib.plugin.config.dto.RouteConfiguration;
 import io.github.linagora.linid.im.corelib.plugin.entity.DynamicEntity;
@@ -73,10 +74,10 @@ class DynamicListRoutePluginTest {
   private TaskEngine taskEngine;
 
   @Mock
-  private AuthorizationFactory authorizationFactory;
+  private AuthenticationFactory authenticationFactory;
 
   @Mock
-  private AuthorizationPlugin authorizationPlugin;
+  private AuthenticationPlugin authenticationPlugin;
 
   @InjectMocks
   private DynamicListRoutePlugin plugin;
@@ -169,7 +170,8 @@ class DynamicListRoutePluginTest {
             "destination", "response",
             "phases", List.of("beforeDynamicListMapping"))
     ));
-    when(authorizationFactory.getAuthorizationPlugin()).thenReturn(authorizationPlugin);
+    when(authenticationFactory.getAuthenticationPlugin()).thenReturn(authenticationPlugin);
+    when(authenticationFactory.getAuthenticationConfiguration()).thenReturn(new AuthenticationConfiguration());
     when(httpService.request(any(TaskExecutionContext.class), any(PluginConfiguration.class)))
         .thenReturn("{\"content\":[{\"name\":\"Type 1\",\"id\":\"1\"},{\"name\":\"Type 2\",\"id\":\"2\"}],"
             + "\"page\":0,\"size\":10,\"totalElements\":2}");
@@ -210,7 +212,7 @@ class DynamicListRoutePluginTest {
     assertEquals(10, page.getSize());
     assertEquals(2, page.getTotalElements());
 
-    verify(authorizationPlugin).validateToken(eq(null), any(TaskExecutionContext.class));
+    verify(authenticationPlugin).validateToken(any(AuthenticationConfiguration.class), eq(null), any(TaskExecutionContext.class));
     verify(taskEngine).execute(any(DynamicEntity.class), any(TaskExecutionContext.class),
         eq("beforeTokenValidationDynamicList"));
     verify(taskEngine).execute(any(DynamicEntity.class), any(TaskExecutionContext.class),

@@ -28,7 +28,7 @@ package io.github.linagora.linid.im.dlvp;
 
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
-import io.github.linagora.linid.im.corelib.plugin.authorization.AuthorizationFactory;
+import io.github.linagora.linid.im.corelib.plugin.authentication.AuthenticationFactory;
 import io.github.linagora.linid.im.corelib.plugin.config.JinjaService;
 import io.github.linagora.linid.im.corelib.plugin.config.dto.EntityConfiguration;
 import io.github.linagora.linid.im.corelib.plugin.config.dto.RouteConfiguration;
@@ -84,8 +84,8 @@ public class DynamicListRoutePlugin implements RoutePlugin, DynamicListSupport {
   /** Engine to execute lifecycle tasks before and after response mapping. */
   private final TaskEngine taskEngine;
 
-  /** Factory to retrieve the authorization plugin for token validation. */
-  private final AuthorizationFactory authorizationFactory;
+  /** Factory to retrieve the authentication plugin for token validation. */
+  private final AuthenticationFactory authenticationFactory;
 
   /** Object mapper for converting configuration options to typed models. */
   private final ObjectMapper mapper = new ObjectMapper();
@@ -96,17 +96,17 @@ public class DynamicListRoutePlugin implements RoutePlugin, DynamicListSupport {
    * @param httpService service used to execute HTTP requests to external APIs
    * @param jinjaService service used to render Jinja templates for value extraction
    * @param taskEngine engine to execute lifecycle tasks before and after response mapping
-   * @param authorizationFactory factory to retrieve the authorization plugin
+   * @param authenticationFactory factory to retrieve the authentication plugin
    */
   @Autowired
   public DynamicListRoutePlugin(final HttpService httpService,
                                 final JinjaService jinjaService,
                                 final TaskEngine taskEngine,
-                                final AuthorizationFactory authorizationFactory) {
+                                final AuthenticationFactory authenticationFactory) {
     this.httpService = httpService;
     this.jinjaService = jinjaService;
     this.taskEngine = taskEngine;
-    this.authorizationFactory = authorizationFactory;
+    this.authenticationFactory = authenticationFactory;
   }
 
   @Override
@@ -156,10 +156,11 @@ public class DynamicListRoutePlugin implements RoutePlugin, DynamicListSupport {
     TaskExecutionContext context = new TaskExecutionContext();
     DynamicEntity entity = buildDynamicEntity(configuration);
 
-    var authorizationPlugin = authorizationFactory.getAuthorizationPlugin();
+    var authenticationPlugin = authenticationFactory.getAuthenticationPlugin();
+    var authenticationConfig = authenticationFactory.getAuthenticationConfiguration();
 
     taskEngine.execute(entity, context, "beforeTokenValidationDynamicList");
-    authorizationPlugin.validateToken(request, context);
+    authenticationPlugin.validateToken(authenticationConfig, request, context);
     taskEngine.execute(entity, context, "afterTokenValidationDynamicList");
 
     taskEngine.execute(entity, context, "beforeDynamicList");

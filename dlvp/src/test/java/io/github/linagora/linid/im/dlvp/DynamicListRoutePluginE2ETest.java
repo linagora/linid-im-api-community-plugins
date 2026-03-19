@@ -33,10 +33,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.hubspot.jinjava.Jinjava;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
-import io.github.linagora.linid.im.corelib.plugin.authorization.AbstractAuthorizationPlugin;
-import io.github.linagora.linid.im.corelib.plugin.authorization.AuthorizationFactory;
+import io.github.linagora.linid.im.corelib.plugin.authentication.AllowAllAuthenticationPlugin;
+import io.github.linagora.linid.im.corelib.plugin.authentication.AuthenticationFactory;
+import io.github.linagora.linid.im.corelib.plugin.authentication.AuthenticationPlugin;
 import io.github.linagora.linid.im.corelib.plugin.config.JinjaService;
-import io.github.linagora.linid.im.corelib.plugin.config.dto.RootConfiguration;
+import io.github.linagora.linid.im.corelib.plugin.config.dto.AuthenticationConfiguration;
 import io.github.linagora.linid.im.corelib.plugin.config.dto.RouteConfiguration;
 import io.github.linagora.linid.im.corelib.plugin.entity.DynamicEntity;
 import io.github.linagora.linid.im.corelib.plugin.task.TaskEngine;
@@ -44,7 +45,6 @@ import io.github.linagora.linid.im.corelib.plugin.task.TaskExecutionContext;
 import io.github.linagora.linid.im.dlvp.model.DynamicListEntry;
 import io.github.linagora.linid.im.dlvp.service.HttpServiceImpl;
 import io.github.linagora.linid.im.jptp.JsonParsingTaskPlugin;
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,9 +64,20 @@ class DynamicListRoutePluginE2ETest {
     JinjaService jinjaService = new JinjaServiceTest();
     var httpService = new HttpServiceImpl(jinjaService);
     TaskEngine taskEngine = new TaskEngineTest();
-    AuthorizationFactory authorizationFactory = NoOpAuthorizationPluginTest::new;
+    var authenticationPlugin = new AllowAllAuthenticationPlugin();
+    AuthenticationFactory authenticationFactory = new AuthenticationFactory() {
+      @Override
+      public AuthenticationPlugin getAuthenticationPlugin() {
+        return authenticationPlugin;
+      }
+
+      @Override
+      public AuthenticationConfiguration getAuthenticationConfiguration() {
+        return null;
+      }
+    };
     plugin = new DynamicListRoutePlugin(httpService, jinjaService, taskEngine,
-        authorizationFactory);
+        authenticationFactory);
   }
 
   private RouteConfiguration buildConfiguration(String url, String method) {
@@ -231,46 +242,6 @@ class DynamicListRoutePluginE2ETest {
 
     assertEquals(500, exception.getStatusCode());
     assertEquals("error.plugin.default.invalid.option", exception.getError().key());
-  }
-
-  /**
-   * No-op AuthorizationPlugin for testing that allows all requests.
-   */
-  static class NoOpAuthorizationPluginTest extends AbstractAuthorizationPlugin {
-
-    @Override
-    public void updateConfiguration(RootConfiguration configuration) {
-      // No-op
-    }
-
-    @Override
-    public void validateToken(HttpServletRequest request, TaskExecutionContext context) {
-      // No-op: allow all requests in tests
-    }
-
-    @Override
-    public void isAuthorized(HttpServletRequest request, DynamicEntity entity,
-                             String action, TaskExecutionContext context) {
-      // No-op
-    }
-
-    @Override
-    public void isAuthorized(HttpServletRequest request, DynamicEntity entity,
-                             String id, String action, TaskExecutionContext context) {
-      // No-op
-    }
-
-    @Override
-    public void isAuthorized(HttpServletRequest request, DynamicEntity entity,
-                             org.springframework.util.MultiValueMap<String, String> filters,
-                             String action, TaskExecutionContext context) {
-      // No-op
-    }
-
-    @Override
-    public boolean supports(String type) {
-      return true;
-    }
   }
 
   /**

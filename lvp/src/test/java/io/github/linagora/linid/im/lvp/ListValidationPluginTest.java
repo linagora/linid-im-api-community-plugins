@@ -56,7 +56,7 @@ public class ListValidationPluginTest {
     var configuration = new ValidationConfiguration();
 
     ApiException exception =
-        assertThrows(ApiException.class, () -> plugin.validate(configuration, "test"));
+        assertThrows(ApiException.class, () -> plugin.validate(configuration, "test", null));
 
     assertEquals(500, exception.getStatusCode());
     assertEquals("error.plugin.default.missing.option", exception.getError().key());
@@ -70,7 +70,7 @@ public class ListValidationPluginTest {
     var configuration = new ValidationConfiguration();
     configuration.addOption("allowedValues", "invalid");
     ApiException exception =
-        assertThrows(ApiException.class, () -> plugin.validate(configuration, "test"));
+        assertThrows(ApiException.class, () -> plugin.validate(configuration, "test", null));
 
     assertEquals(500, exception.getStatusCode());
     assertEquals("error.plugin.default.invalid.option", exception.getError().key());
@@ -83,7 +83,7 @@ public class ListValidationPluginTest {
     var plugin = new ListValidationPlugin();
     var configuration = new ValidationConfiguration();
 
-    var error = plugin.validate(configuration, null);
+    var error = plugin.validate(configuration, null, null);
 
     assertNotNull(error);
     assertTrue(error.isEmpty());
@@ -95,7 +95,7 @@ public class ListValidationPluginTest {
     var plugin = new ListValidationPlugin();
     var configuration = new ValidationConfiguration();
 
-    var error = plugin.validate(configuration, "");
+    var error = plugin.validate(configuration, "", null);
 
     assertNotNull(error);
     assertTrue(error.isEmpty());
@@ -108,7 +108,7 @@ public class ListValidationPluginTest {
     var configuration = new ValidationConfiguration();
     configuration.addOption("allowedValues", new String[] {"TEST"});
 
-    var error = plugin.validate(configuration, "test");
+    var error = plugin.validate(configuration, "test", null);
 
     assertNotNull(error);
     assertTrue(error.isPresent());
@@ -122,7 +122,7 @@ public class ListValidationPluginTest {
     var configuration = new ValidationConfiguration();
     configuration.addOption("allowedValues", new String[] {"TEST"});
 
-    var error = plugin.validate(configuration, "A");
+    var error = plugin.validate(configuration, "A", null);
 
     assertNotNull(error);
     assertTrue(error.isPresent());
@@ -136,7 +136,7 @@ public class ListValidationPluginTest {
     var configuration = new ValidationConfiguration();
     configuration.addOption("allowedValues", new String[] {"TEST"});
 
-    var error = plugin.validate(configuration, "TEST");
+    var error = plugin.validate(configuration, "TEST", null);
 
     assertNotNull(error);
     assertTrue(error.isEmpty());
@@ -149,10 +149,10 @@ public class ListValidationPluginTest {
     var configuration = new ValidationConfiguration();
     configuration.addOption("allowedValues", new String[] {"VALUE1", "VALUE2", "VALUE3"});
 
-    var error1 = plugin.validate(configuration, "VALUE1");
-    var error2 = plugin.validate(configuration, "VALUE2");
-    var error3 = plugin.validate(configuration, "VALUE3");
-    var errorInvalid = plugin.validate(configuration, "VALUE4");
+    var error1 = plugin.validate(configuration, "VALUE1", null);
+    var error2 = plugin.validate(configuration, "VALUE2", null);
+    var error3 = plugin.validate(configuration, "VALUE3", null);
+    var errorInvalid = plugin.validate(configuration, "VALUE4", null);
 
     assertTrue(error1.isEmpty());
     assertTrue(error2.isEmpty());
@@ -167,10 +167,10 @@ public class ListValidationPluginTest {
     var configuration = new ValidationConfiguration();
     configuration.addOption("allowedValues", new String[] {"STRING", "123", "true"});
     
-    var errorString = plugin.validate(configuration, "STRING");
-    var errorNumber = plugin.validate(configuration, 123);
-    var errorBoolean = plugin.validate(configuration, true);
-    var errorInvalid = plugin.validate(configuration, "invalid");
+    var errorString = plugin.validate(configuration, "STRING", null);
+    var errorNumber = plugin.validate(configuration, 123, null);
+    var errorBoolean = plugin.validate(configuration, true, null);
+    var errorInvalid = plugin.validate(configuration, "invalid", null);
     
     assertTrue(errorString.isEmpty());
     assertTrue(errorNumber.isEmpty());

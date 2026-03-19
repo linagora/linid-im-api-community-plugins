@@ -26,50 +26,29 @@
 
 package io.github.linagora.linid.im.myplugin;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import io.github.linagora.linid.im.corelib.plugin.authorization.AllowAllAuthorizationPlugin;
-import io.github.linagora.linid.im.corelib.plugin.config.dto.RootConfiguration;
-import io.github.linagora.linid.im.corelib.plugin.entity.DynamicEntity;
+import io.github.linagora.linid.im.corelib.plugin.authentication.AuthenticationPlugin;
+import io.github.linagora.linid.im.corelib.plugin.config.dto.AuthenticationConfiguration;
 import io.github.linagora.linid.im.corelib.plugin.task.TaskExecutionContext;
 import jakarta.servlet.http.HttpServletRequest;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.util.LinkedMultiValueMap;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Component;
 
-@DisplayName("Test class:  MyPluginAuthorizationPlugin")
-class MyPluginAuthorizationPluginTest {
+/**
+ * MyPlugin authentication javadoc.
+ */
+@Slf4j
+@Component
+public class MyPluginAuthenticationPlugin implements AuthenticationPlugin {
 
-  @Test
-  @DisplayName("Test support: should return true only on MyPlugin")
-  void testSupports() {
-    assertTrue(new MyPluginAuthorizationPlugin().supports("MyPlugin"));
-    assertFalse(new MyPluginAuthorizationPlugin().supports("Other"));
+  @Override
+  public boolean supports(final @NonNull String type) {
+    return "MyPlugin".equals(type);
   }
 
-  @Test
-  @DisplayName("Test updateConfiguration: should not throw exception")
-  void testUpdateConfiguration() {
-    assertDoesNotThrow(() -> new MyPluginAuthorizationPlugin().updateConfiguration(Mockito.mock(RootConfiguration.class)));
-  }
-
-  @Test
-  @DisplayName("Test validateToken: should not throw exception")
-  void testValidateToken() {
-    var request = Mockito.mock(HttpServletRequest.class);
-    var context = new TaskExecutionContext();
-    var entity = new DynamicEntity();
-    var filters = new LinkedMultiValueMap<String, String>();
-
-    assertDoesNotThrow(() -> new MyPluginAuthorizationPlugin().validateToken(request, context));
-    assertDoesNotThrow(() -> new MyPluginAuthorizationPlugin().isAuthorized(request, entity, "read", context));
-    assertDoesNotThrow(() -> new MyPluginAuthorizationPlugin().isAuthorized(request, entity, "123", "read", context));
-    assertDoesNotThrow(() -> new MyPluginAuthorizationPlugin().isAuthorized(request, entity, filters, "read", context));
+  @Override
+  public void validateToken(AuthenticationConfiguration configuration, HttpServletRequest request,
+                            TaskExecutionContext context) {
+    log.info("validate token of 'MyPlugin'");
   }
 }

@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- update ValidationPlugin signature with TaskExecutionContext
 - fix paths and test coverage for pull request workflow
 
 

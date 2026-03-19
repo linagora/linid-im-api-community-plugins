@@ -29,6 +29,7 @@ package io.github.linagora.linid.im.lvp;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import io.github.linagora.linid.im.corelib.plugin.config.dto.ValidationConfiguration;
+import io.github.linagora.linid.im.corelib.plugin.task.TaskExecutionContext;
 import io.github.linagora.linid.im.corelib.plugin.validation.ValidationPlugin;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +63,8 @@ public class ListValidationPlugin implements ValidationPlugin {
 
   @Override
   public Optional<I18nMessage> validate(
-      final ValidationConfiguration configuration, final Object value) {
+      final ValidationConfiguration configuration, final Object value,
+      final TaskExecutionContext context) {
 
     Map<String, Object> options = configuration.getOptions();
 

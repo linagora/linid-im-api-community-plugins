@@ -51,7 +51,7 @@ class RequiredValidationPluginTest {
   @Test
   @DisplayName("test validate: should return message on null value")
   void testValidateNullValue() {
-    var error = plugin.validate(configuration, null);
+    var error = plugin.validate(configuration, null, null);
 
     assertEquals("error.plugin.required.empty.value", error.get().key());
   }
@@ -59,7 +59,7 @@ class RequiredValidationPluginTest {
   @Test
   @DisplayName("test validate: should return message on empty string value")
   void testValidateEmptyStringValue() {
-    var error = plugin.validate(configuration, "");
+    var error = plugin.validate(configuration, "", null);
 
     assertNotNull(error);
     assertTrue(error.isPresent());
@@ -69,7 +69,7 @@ class RequiredValidationPluginTest {
   @Test
   @DisplayName("test validate: should not return message on valid string value")
   void testValidateValidStringValue() {
-    var error = plugin.validate(configuration, "valid value");
+    var error = plugin.validate(configuration, "valid value", null);
 
     assertNotNull(error);
     assertTrue(error.isEmpty());
@@ -78,7 +78,7 @@ class RequiredValidationPluginTest {
   @Test
   @DisplayName("test validate: should not return message on valid number value")
   void testValidateValidNumberValue() {
-    var error = plugin.validate(configuration, 123);
+    var error = plugin.validate(configuration, 123, null);
 
     assertNotNull(error);
     assertTrue(error.isEmpty());

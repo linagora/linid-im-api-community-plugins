@@ -28,6 +28,7 @@ package io.github.linagora.linid.im.rqvp;
 
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import io.github.linagora.linid.im.corelib.plugin.config.dto.ValidationConfiguration;
+import io.github.linagora.linid.im.corelib.plugin.task.TaskExecutionContext;
 import io.github.linagora.linid.im.corelib.plugin.validation.ValidationPlugin;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +48,8 @@ public class RequiredValidationPlugin implements ValidationPlugin {
   }
 
   @Override
-  public Optional<I18nMessage> validate(final ValidationConfiguration configuration, final Object value) {
+  public Optional<I18nMessage> validate(final ValidationConfiguration configuration, final Object value,
+      final TaskExecutionContext context) {
     if (value == null || value.toString().isEmpty()) {
       return Optional.of(I18nMessage.of("error.plugin.required.empty.value"));
     }

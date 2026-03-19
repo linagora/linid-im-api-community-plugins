@@ -19,4 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - skip validation for null and empty values
 - remove useless context for error message
 
+### Changed
+
+- update ValidationPlugin signature with TaskExecutionContext
+
 

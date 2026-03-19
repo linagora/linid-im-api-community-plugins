@@ -117,7 +117,7 @@ class DynamicListValidationPluginTest {
   void testValidateNullValue() {
     var configuration = buildConfiguration();
 
-    var error = plugin.validate(configuration, null);
+    var error = plugin.validate(configuration, null, null);
 
     assertNotNull(error);
     assertTrue(error.isEmpty());
@@ -128,7 +128,7 @@ class DynamicListValidationPluginTest {
   void testValidateEmptyStringValue() {
     var configuration = buildConfiguration();
 
-    var error = plugin.validate(configuration, "");
+    var error = plugin.validate(configuration, "", null);
 
     assertNotNull(error);
     assertTrue(error.isEmpty());
@@ -140,7 +140,7 @@ class DynamicListValidationPluginTest {
     var configuration = buildConfiguration();
     mockServiceAndJinja(new String[]{"TypeA", "A"}, new String[]{"TypeB", "B"});
 
-    var error = plugin.validate(configuration, "C");
+    var error = plugin.validate(configuration, "C", null);
 
     assertNotNull(error);
     assertTrue(error.isPresent());
@@ -157,7 +157,7 @@ class DynamicListValidationPluginTest {
     var configuration = buildConfiguration();
     mockServiceAndJinja(new String[]{"TypeA", "A"}, new String[]{"TypeB", "B"});
 
-    var error = plugin.validate(configuration, "A");
+    var error = plugin.validate(configuration, "A", null);
 
     assertNotNull(error);
     assertTrue(error.isEmpty());
@@ -178,7 +178,7 @@ class DynamicListValidationPluginTest {
     var configuration = buildConfiguration();
     mockServiceAndJinja();
 
-    var error = plugin.validate(configuration, "A");
+    var error = plugin.validate(configuration, "A", null);
 
     assertNotNull(error);
     assertTrue(error.isPresent());
@@ -191,7 +191,7 @@ class DynamicListValidationPluginTest {
     var configuration = buildConfiguration();
     mockServiceAndJinja(new String[]{"Active", "ACTIVE"});
 
-    var error = plugin.validate(configuration, "active");
+    var error = plugin.validate(configuration, "active", null);
 
     assertNotNull(error);
     assertTrue(error.isPresent());
@@ -205,7 +205,7 @@ class DynamicListValidationPluginTest {
     when(httpService.request(any(TaskExecutionContext.class), any(PluginConfiguration.class)))
         .thenThrow(new ApiException(502, I18nMessage.of("dlvp.error.external.api.unavailable")));
 
-    assertThrows(ApiException.class, () -> plugin.validate(configuration, "A"));
+    assertThrows(ApiException.class, () -> plugin.validate(configuration, "A", null));
   }
 
   @Test
@@ -214,12 +214,12 @@ class DynamicListValidationPluginTest {
     var configuration = buildConfiguration();
     mockServiceAndJinja(new String[]{"FortyTwo", "42"}, new String[]{"True", "true"});
 
-    var errorInt = plugin.validate(configuration, 42);
+    var errorInt = plugin.validate(configuration, 42, null);
 
     assertNotNull(errorInt);
     assertTrue(errorInt.isEmpty());
 
-    var errorBool = plugin.validate(configuration, true);
+    var errorBool = plugin.validate(configuration, true, null);
 
     assertNotNull(errorBool);
     assertTrue(errorBool.isEmpty());

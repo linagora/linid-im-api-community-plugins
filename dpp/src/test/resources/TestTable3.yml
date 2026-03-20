@@ -1,0 +1,31 @@
+name: user
+provider: POSTGRES
+tasks:
+access:
+  create:
+    table: test_table_3
+  update:
+    table: test_table_3
+  delete:
+    table: test_table_3
+  findAll:
+    table: test_table_3
+  patch:
+    table: test_table_3
+  findById:
+    table: test_table_3
+attributes:
+  - name: id
+    type: String
+    required: true
+    access:
+      primaryKey: true
+      column: id
+  - name: userName
+    access:
+      primaryKey: false
+      column: name
+  - name: userEmail
+    access:
+      primaryKey: false
+      column: email

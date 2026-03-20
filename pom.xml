@@ -15,6 +15,7 @@
     <module>lvp</module>
     <module>jptp</module>
     <module>dlvp</module>
+    <module>oiap</module>
   </modules>
   <licenses>
     <license>

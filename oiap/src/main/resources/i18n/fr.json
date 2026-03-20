@@ -1,0 +1,4 @@
+{
+  "oiap.error.token.invalid": "Le jeton d'accès fourni est invalide.",
+  "oiap.error.claim.missing": "La claim requise '{{ claim }}' est manquante dans le jeton."
+}

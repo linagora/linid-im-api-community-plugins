@@ -1,0 +1,4 @@
+{
+  "oiap.error.token.invalid": "The provided access token is invalid.",
+  "oiap.error.claim.missing": "The required claim '{{ claim }}' is missing from the token."
+}

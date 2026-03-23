@@ -1,0 +1,3 @@
+{
+  "kap.error.producer.creation": "Failed to create Kafka producer for brokers '{{brokers}}'."
+}

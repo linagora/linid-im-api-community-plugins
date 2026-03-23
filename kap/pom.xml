@@ -49,5 +49,34 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <configuration>
+          <filters>
+            <filter>
+              <artifact>org.apache.kafka:kafka-clients</artifact>
+              <excludes>
+                <exclude>org/apache/kafka/common/security/oauthbearer/BrokerJwtValidator*.class</exclude>
+                <exclude>org/apache/kafka/common/security/oauthbearer/internals/secured/JwksFileVerificationKeyResolver*.class</exclude>
+                <exclude>org/apache/kafka/common/security/oauthbearer/internals/secured/RefreshingHttpsJwks*.class</exclude>
+                <exclude>org/apache/kafka/common/security/oauthbearer/internals/secured/VerificationKeyResolverFactory*.class</exclude>
+                <exclude>org/apache/kafka/common/security/oauthbearer/internals/secured/CloseableVerificationKeyResolver.class</exclude>
+                <exclude>org/apache/kafka/server/telemetry/**</exclude>
+                <exclude>org/apache/kafka/shaded/**/collector/**</exclude>
+              </excludes>
+            </filter>
+            <filter>
+              <artifact>org.xerial.snappy:snappy-java</artifact>
+              <excludes>
+                <exclude>org/xerial/snappy/SnappyBundleActivator.class</exclude>
+              </excludes>
+            </filter>
+          </filters>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

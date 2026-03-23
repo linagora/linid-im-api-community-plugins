@@ -15,6 +15,7 @@ Each plugin is maintained in a dedicated subdirectory and follows the same struc
 | `cmtp` | Context plugin: task to map context values + validation to compare values. |
 | `hpp`  | Task plugin to execute configurable HTTP requests within task lifecycles.  |
 | `jptp` | Task plugin to parse a JSON string from the context.                       |
+| `kap`  | Task plugin to publish messages to Apache Kafka.                           |
 
 ### **📦 Provider plugins**
 

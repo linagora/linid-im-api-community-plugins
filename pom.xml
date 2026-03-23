@@ -16,6 +16,7 @@
     <module>jptp</module>
     <module>dlvp</module>
     <module>dpp</module>
+    <module>kap</module>
   </modules>
   <licenses>
     <license>

@@ -28,7 +28,6 @@ package io.github.linagora.linid.im.dpp.service;
 
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
-import io.github.linagora.linid.im.corelib.plugin.config.dto.AttributeConfiguration;
 import io.github.linagora.linid.im.corelib.plugin.config.dto.ProviderConfiguration;
 import io.github.linagora.linid.im.corelib.plugin.entity.DynamicEntity;
 import io.github.linagora.linid.im.corelib.plugin.task.TaskEngine;
@@ -184,7 +183,7 @@ public class CrudServiceImpl implements CrudService {
       Map<Field<?>, Object> fields = buildFields(tableName, dynamicEntity);
 
       Record record = dsl.insertInto(table)
-          .set(fields)
+          .set(buildFieldExpressions)
           .returning(fields.keySet())
           .fetchOne();
 
@@ -217,7 +216,7 @@ public class CrudServiceImpl implements CrudService {
 
     try {
       Record record = dsl.update(table)
-          .set(fields)
+          .set(buildFieldExpressions)
           .where(DSL.field(idColumn).eq(id))
           .returning(fields.keySet())
           .fetchOne();
@@ -252,7 +251,7 @@ public class CrudServiceImpl implements CrudService {
 
     try {
       Record record = dsl.update(table)
-          .set(fields)
+          .set(buildFieldExpressions)
           .where(DSL.field(idColumn).eq(id))
           // Rebuild fields to have all fields
           .returning(buildFields(tableName, dynamicEntity).keySet())
@@ -334,11 +333,12 @@ public class CrudServiceImpl implements CrudService {
    * @param dynamicEntity the source entity
    * @return the map of database fields and values
    */
-  public Map<Field<?>, Object> buildFields(final String tableName, final DynamicEntity dynamicEntity) {
+  public Map<Field<?>, Object> buildFields(final String tableName, final DynamicEntity dynamicEntity, boolean partial) {
     Map<String, Object> attributes = dynamicEntity.getAttributes();
 
     return dynamicEntity.getConfiguration().getAttributes().stream()
         .filter(attr -> attr.getAccess().get("column") != null)
+        .filter(attr -> !partial || attributes.containsKey(attr.getName()))
         .collect(Collectors.toMap(
             attr -> DSL.field(DSL.name(tableName, (String) attr.getAccess().get("column"))),
             attr -> attributes.getOrDefault(attr.getName(), DSL.defaultValue())));
@@ -351,7 +351,7 @@ public class CrudServiceImpl implements CrudService {
    * @param dynamicEntity the source entity
    * @return the map of database fields and values
    */
-  public Map<Field<?>, Object> buildPartialFields(final String tableName, final DynamicEntity dynamicEntity) {
+  public Map<Field<?>, Object> buildFields(final String tableName, final DynamicEntity dynamicEntity) {
     Map<String, Object> attributes = dynamicEntity.getAttributes();
 
     return dynamicEntity.getConfiguration().getAttributes().stream()
@@ -360,6 +360,17 @@ public class CrudServiceImpl implements CrudService {
         .collect(Collectors.toMap(
             attr -> DSL.field(DSL.name(tableName, (String) attr.getAccess().get("column"))),
             attr -> attributes.getOrDefault(attr.getName(), DSL.defaultValue())));
+  }
+
+  public Map<Field<?>, Object> buildFieldExpressions(final String tableName,  DynamicEntity dynamicEntity) {
+    Field<Object> field = DSL.field(
+      "tstzrange({0}, {1}, {2})",
+      Object.class,
+      DSL.val(startTimestamp),
+      DSL.val(endTimestamp),
+      DSL.val(bounds)
+    );
+    return field;
   }
 
   /**

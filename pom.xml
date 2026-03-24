@@ -17,6 +17,7 @@
     <module>dlvp</module>
     <module>dpp</module>
     <module>kap</module>
+    <module>emtp</module>
   </modules>
   <licenses>
     <license>

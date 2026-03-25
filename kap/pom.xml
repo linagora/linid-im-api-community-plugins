@@ -52,6 +52,15 @@
   <build>
     <plugins>
       <plugin>
+        <groupId>org.pitest</groupId>
+        <artifactId>pitest-maven</artifactId>
+        <configuration>
+          <excludedTestClasses>
+            <param>io.github.linagora.linid.im.kap.KafkaPublishTaskPluginE2ETest</param>
+          </excludedTestClasses>
+        </configuration>
+      </plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
         <configuration>

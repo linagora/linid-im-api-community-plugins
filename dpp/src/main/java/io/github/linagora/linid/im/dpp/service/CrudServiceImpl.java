@@ -28,21 +28,24 @@ package io.github.linagora.linid.im.dpp.service;
 
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
+import io.github.linagora.linid.im.corelib.plugin.config.JinjaService;
 import io.github.linagora.linid.im.corelib.plugin.config.dto.ProviderConfiguration;
 import io.github.linagora.linid.im.corelib.plugin.entity.DynamicEntity;
-import io.github.linagora.linid.im.corelib.plugin.task.TaskEngine;
 import io.github.linagora.linid.im.corelib.plugin.task.TaskExecutionContext;
 import io.github.linagora.linid.im.dpp.model.DatabasePluginConfiguration;
 import io.github.linagora.linid.im.dpp.registry.DslRegistry;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Name;
+import org.jooq.QueryPart;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.SortField;
@@ -74,13 +77,19 @@ public class CrudServiceImpl implements CrudService {
   private final DslRegistry dslRegistry;
 
   /**
+   * Service used to render Jinja templates for field expressions in configuration,and response mappings.
+   */
+  private final JinjaService jinjaService;
+
+  /**
    * Constructor for CrudServiceImpl.
    *
    * @param dslRegistry the registry to obtain DSLContext instances based on
    *                    provider configuration
    */
-  public CrudServiceImpl(final DslRegistry dslRegistry) {
+  public CrudServiceImpl(final DslRegistry dslRegistry, final JinjaService jinjaService) {
     this.dslRegistry = dslRegistry;
+    this.jinjaService = jinjaService;
   }
 
   @Override
@@ -156,17 +165,20 @@ public class CrudServiceImpl implements CrudService {
   @Transactional
   public DynamicEntity insert(final ProviderConfiguration config,
       final DatabasePluginConfiguration databasePluginConfiguration,
-      final DynamicEntity dynamicEntity) {
+      final DynamicEntity dynamicEntity,
+      final TaskExecutionContext context) {
     String tableName = databasePluginConfiguration.getTable();
     DSLContext dsl = dslRegistry.getDsl(config);
     Table<?> table = DSL.table(DSL.name(tableName));
-    Map<Field<?>, Object> fields = buildFields(tableName, dynamicEntity, false);
+    Map<Field<?>, Object> assignmentFields = buildAssignmentFields(tableName, databasePluginConfiguration, context,
+        dynamicEntity, false);
+    List<Field<?>> retrievingFields = buildRetrievingFields(tableName, databasePluginConfiguration, context,
+        dynamicEntity);
 
     try {
-
       Record record = dsl.insertInto(table)
-          .set(fields)
-          .returning(fields.keySet())
+          .set(assignmentFields)
+          .returning(retrievingFields)
           .fetchOne();
 
       if (record == null) {
@@ -187,18 +199,22 @@ public class CrudServiceImpl implements CrudService {
   public DynamicEntity update(final ProviderConfiguration config,
       final DatabasePluginConfiguration databasePluginConfiguration,
       final Object id,
-      final DynamicEntity dynamicEntity) {
+      final DynamicEntity dynamicEntity,
+      final TaskExecutionContext context) {
     DSLContext dsl = dslRegistry.getDsl(config);
     String tableName = databasePluginConfiguration.getTable();
     Table<?> table = DSL.table(DSL.name(tableName));
     var idColumn = resolveIdColumn(dynamicEntity);
-    Map<Field<?>, Object> fields = buildFields(tableName, dynamicEntity, false);
+    Map<Field<?>, Object> assignmentFields = buildAssignmentFields(tableName, databasePluginConfiguration, context,
+        dynamicEntity, false);
+    List<Field<?>> retrievingFields = buildRetrievingFields(tableName, databasePluginConfiguration, context,
+        dynamicEntity);
 
     try {
       Record record = dsl.update(table)
-          .set(fields)
+          .set(assignmentFields)
           .where(DSL.field(idColumn).eq(id))
-          .returning(fields.keySet())
+          .returning(retrievingFields)
           .fetchOne();
 
       if (record == null) {
@@ -220,19 +236,22 @@ public class CrudServiceImpl implements CrudService {
   public DynamicEntity patch(final ProviderConfiguration config,
       final DatabasePluginConfiguration databasePluginConfiguration,
       final Object id,
-      final DynamicEntity dynamicEntity) {
+      final DynamicEntity dynamicEntity,
+      final TaskExecutionContext context) {
     DSLContext dsl = dslRegistry.getDsl(config);
     String tableName = databasePluginConfiguration.getTable();
     Table<?> table = DSL.table(DSL.name(tableName));
     var idColumn = resolveIdColumn(dynamicEntity);
-    Map<Field<?>, Object> fields = buildFields(tableName, dynamicEntity, true);
+    Map<Field<?>, Object> assignmentFields = buildAssignmentFields(tableName, databasePluginConfiguration, context,
+        dynamicEntity, true);
+    List<Field<?>> retrievingFields = buildRetrievingFields(tableName, databasePluginConfiguration, context,
+        dynamicEntity);
 
     try {
       Record record = dsl.update(table)
-          .set(fields)
+          .set(assignmentFields)
           .where(DSL.field(idColumn).eq(id))
-          // Rebuild fields to have all fields
-          .returning(buildFields(tableName, dynamicEntity, false).keySet())
+          .returning(retrievingFields)
           .fetchOne();
 
       if (record == null) {
@@ -302,13 +321,167 @@ public class CrudServiceImpl implements CrudService {
   }
 
   /**
+   * Builds a map of fields and values for assignment in SQL queries.
+   *
+   * @param tableName                   the name of the table
+   * @param databasePluginConfiguration the database plugin configuration
+   * @param context                     the task execution context
+   * @param dynamicEntity               the dynamic entity
+   * @param partial                     whether the update is partial
+   * @return a map of fields and values for assignment in SQL queries
+   */
+  Map<Field<?>, Object> buildAssignmentFields(final String tableName,
+      final DatabasePluginConfiguration databasePluginConfiguration,
+      final TaskExecutionContext context,
+      final DynamicEntity dynamicEntity,
+      final boolean partial) {
+    Map<Field<?>, Object> assignmentFieldExpressions = configurationAssignmentFields(
+        tableName, databasePluginConfiguration, context, dynamicEntity, partial);
+    Map<Field<?>, Object> requestFieldExpressions = buildFields(tableName, dynamicEntity, partial);
+
+    for (Map.Entry<Field<?>, Object> entry : requestFieldExpressions.entrySet()) {
+      assignmentFieldExpressions.putIfAbsent(entry.getKey(), entry.getValue());
+    }
+
+    return assignmentFieldExpressions;
+  }
+
+  /**
+   * Builds a map of fields and values from configuration.
+   *
+   * @param tableName                   the name of the table
+   * @param databasePluginConfiguration the database plugin configuration
+   * @param context                     the task execution context
+   * @param dynamicEntity               the dynamic entity
+   * @param partial                     whether the update is partial
+   * @return a map of fields and values from configuration
+   */
+  private Map<Field<?>, Object> configurationAssignmentFields(final String tableName,
+      DatabasePluginConfiguration databasePluginConfiguration,
+      final TaskExecutionContext context,
+      final DynamicEntity dynamicEntity,
+      final boolean partial) {
+    if (databasePluginConfiguration.getAssignmentFieldExpressions() == null
+        || databasePluginConfiguration.getAssignmentFieldExpressions().isEmpty()) {
+      return new HashMap<>();
+    }
+    Map<Field<?>, Object> fieldExpressions = new HashMap<Field<?>, Object>();
+    Map<Field<?>, Object> fields = buildFields(tableName, dynamicEntity, partial);
+    Set<String> fieldNames = fields.keySet().stream()
+        .map(Field::getName)
+        .collect(Collectors.toSet());
+
+    databasePluginConfiguration.getAssignmentFieldExpressions().entrySet()
+        .stream()
+        .filter(entry -> {
+          List<String> dependsOn = entry.getValue().getDependsOn();
+          return dependsOn == null || fieldNames.containsAll(dependsOn);
+        })
+        .forEach(assignmentFieldExpression -> {
+          String expression = assignmentFieldExpression.getValue().getExpression();
+          List<String> parameters = assignmentFieldExpression.getValue().getParameters();
+          if (parameters == null) {
+            parameters = List.of();
+          }
+
+          QueryPart[] queryParts = parameters.stream()
+              .map(param -> DSL.val(jinjaService.render(context, dynamicEntity, param)))
+              .toArray(QueryPart[]::new);
+
+          Field<Object> fieldName = DSL.field(DSL.name(tableName, assignmentFieldExpression.getKey()));
+          Field<Object> field = DSL.field(
+              expression,
+              Object.class,
+              queryParts);
+
+          fieldExpressions.put(fieldName, field);
+        });
+
+    return fieldExpressions;
+  }
+
+  /**
+   * Builds a list of fields for returning in SQL queries.
+   *
+   * @param tableName                   the name of the table
+   * @param databasePluginConfiguration the database plugin configuration
+   * @param context                     the task execution context
+   * @param dynamicEntity               the dynamic entity
+   * @return a list of fields for the RETURNING clause
+   */
+  private List<Field<?>> buildRetrievingFields(final String tableName,
+      final DatabasePluginConfiguration databasePluginConfiguration, final TaskExecutionContext context,
+      final DynamicEntity dynamicEntity) {
+    List<Field<?>> retrievingFields = configurationRetrievingFields(tableName, databasePluginConfiguration, context,
+        dynamicEntity);
+
+    List<Field<?>> requestFieldExpressions = new ArrayList<Field<?>>();
+    requestFieldExpressions.addAll(buildFields(tableName, dynamicEntity, false).keySet());
+
+    for (Field<?> entry : requestFieldExpressions) {
+      if (retrievingFields.stream().noneMatch(f -> f.getName().equals(entry.getName()))) {
+        retrievingFields.add(entry);
+      }
+    }
+
+    return retrievingFields;
+  }
+
+  /**
+   * Builds a collection of computed fields for the RETURNING clause.
+   *
+   * @param tableName                   the name of the table
+   * @param databasePluginConfiguration the plugin configuration containing
+   * @param context                     the task execution context used for Jinja
+   * @param dynamicEntity               the dynamic entity used for Jinja
+   * @return a collection of aliased DSL fields to use in the RETURNING clause
+   */
+  private List<Field<?>> configurationRetrievingFields(
+      final String tableName,
+      final DatabasePluginConfiguration databasePluginConfiguration,
+      final TaskExecutionContext context,
+      final DynamicEntity dynamicEntity) {
+
+    if (databasePluginConfiguration.getRetrievingFieldExpressions() == null
+        || databasePluginConfiguration.getRetrievingFieldExpressions().isEmpty()) {
+      return new ArrayList<>();
+    }
+    List<Field<?>> fieldExpressions = new ArrayList<>();
+
+    databasePluginConfiguration.getRetrievingFieldExpressions()
+        .entrySet()
+        .stream()
+        .forEach(retrievingFieldExpression -> {
+          String expression = retrievingFieldExpression.getValue().getExpression();
+          List<String> parameters = retrievingFieldExpression.getValue().getParameters();
+          QueryPart[] queryParts = new QueryPart[0];
+
+          if (parameters != null && !parameters.isEmpty()) {
+            List<String> renderedParams = parameters.stream()
+                .map(param -> param != null ? jinjaService.render(context, dynamicEntity, param) : "")
+                .toList();
+
+            queryParts = renderedParams.stream()
+                .map(param -> DSL.name(param))
+                .toArray(QueryPart[]::new);
+          }
+
+          Field<String> field = DSL.field(expression, String.class, queryParts)
+              .as(retrievingFieldExpression.getKey());
+          fieldExpressions.add(field);
+        });
+    return fieldExpressions;
+  }
+
+  /**
    * Builds a map of fields and values for a full update/insert/patch operation.
    *
    * @param dynamicEntity the source entity
-   * @param partial boolean for patch operation
+   * @param partial       boolean for patch operation
    * @return the map of database fields and values
    */
-  private Map<Field<?>, Object> buildFields(final String tableName, final DynamicEntity dynamicEntity, boolean partial) {
+  private Map<Field<?>, Object> buildFields(final String tableName, final DynamicEntity dynamicEntity,
+      boolean partial) {
     Map<String, Object> attributes = dynamicEntity.getAttributes();
 
     return dynamicEntity.getConfiguration().getAttributes().stream()

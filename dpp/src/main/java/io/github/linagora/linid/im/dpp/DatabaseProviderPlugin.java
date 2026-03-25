@@ -84,7 +84,7 @@ public class DatabaseProviderPlugin implements ProviderPlugin {
                               final DynamicEntity dynamicEntity) {
     DatabasePluginConfiguration databasePluginConfiguration = getDatabaseConfiguration("create", dynamicEntity);
 
-    DynamicEntity result = crudService.insert(config, databasePluginConfiguration, dynamicEntity);
+    DynamicEntity result = crudService.insert(config, databasePluginConfiguration, dynamicEntity, context);
 
     return result;
   }
@@ -112,7 +112,12 @@ public class DatabaseProviderPlugin implements ProviderPlugin {
     Object validId = mapId(type, id);
 
     // Perform a partial update using the provided dynamicEntity (patch payload).
-    DynamicEntity result = crudService.patch(config, databasePluginConfiguration, validId, dynamicEntity);
+    DynamicEntity result = crudService.patch(
+        config,
+        databasePluginConfiguration,
+        validId,
+        dynamicEntity,
+        context);
 
     return result;
   }
@@ -162,7 +167,8 @@ public class DatabaseProviderPlugin implements ProviderPlugin {
         config,
         databasePluginConfiguration,
         mapId(type, id),
-        dynamicEntity);
+        dynamicEntity,
+        context);
 
     return result;
   }

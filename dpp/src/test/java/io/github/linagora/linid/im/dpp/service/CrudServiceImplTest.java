@@ -31,9 +31,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.github.linagora.linid.im.corelib.exception.ApiException;
+import io.github.linagora.linid.im.corelib.plugin.config.JinjaService;
 import io.github.linagora.linid.im.corelib.plugin.config.dto.EntityConfiguration;
 import io.github.linagora.linid.im.corelib.plugin.config.dto.ProviderConfiguration;
 import io.github.linagora.linid.im.corelib.plugin.entity.DynamicEntity;
+import io.github.linagora.linid.im.corelib.plugin.task.TaskExecutionContext;
 import io.github.linagora.linid.im.dpp.model.DatabasePluginConfiguration;
 import io.github.linagora.linid.im.dpp.registry.DslRegistry;
 import java.util.HashMap;
@@ -59,12 +61,18 @@ class CrudServiceImplTest {
   private DslRegistry dslRegistry;
 
   @Mock
+  private JinjaService jinjaService;
+
+  @Mock
+  private TaskExecutionContext context;
+
+  @Mock
   private DSLContext dsl;
 
   @Test
   @DisplayName("test resolveIdColumn: should throw exception when no primary key configured for update")
   void testUpdateWithoutPrimaryKey() {
-    CrudServiceImpl service = new CrudServiceImpl(dslRegistry);
+    CrudServiceImpl service = new CrudServiceImpl(dslRegistry, jinjaService);
     ProviderConfiguration providerConfig = new ProviderConfiguration();
 
     EntityConfiguration entityConfig = new EntityConfiguration();
@@ -82,7 +90,7 @@ class CrudServiceImplTest {
     databasePluginConfiguration.setTable("users");
 
     ApiException exception = assertThrows(ApiException.class, () -> {
-      service.update(providerConfig, databasePluginConfiguration, "1", dynamicEntity);
+      service.update(providerConfig, databasePluginConfiguration, "1", dynamicEntity, context);
     });
 
     assertEquals("dpp.error.noPrimary", exception.getMessage());
@@ -91,7 +99,7 @@ class CrudServiceImplTest {
   @Test
   @DisplayName("test resolveIdColumn: should throw exception when no primary key configured for delete")
   void testDeleteWithoutPrimaryKey() {
-    CrudServiceImpl service = new CrudServiceImpl(dslRegistry);
+    CrudServiceImpl service = new CrudServiceImpl(dslRegistry, jinjaService);
     ProviderConfiguration providerConfig = new ProviderConfiguration();
 
     EntityConfiguration entityConfig = new EntityConfiguration();
@@ -116,7 +124,7 @@ class CrudServiceImplTest {
   @Test
   @DisplayName("test resolveIdColumn: should throw exception when no primary key configured for selectOne")
   void testSelectOneWithoutPrimaryKey() {
-    CrudServiceImpl service = new CrudServiceImpl(dslRegistry);
+    CrudServiceImpl service = new CrudServiceImpl(dslRegistry, jinjaService);
     ProviderConfiguration providerConfig = new ProviderConfiguration();
 
     EntityConfiguration entityConfig = new EntityConfiguration();
@@ -142,7 +150,7 @@ class CrudServiceImplTest {
   @Test
   @DisplayName("test insert: should throw exception when create access configuration is missing")
   void testInsertWithMissingCreateAccess() {
-    CrudServiceImpl service = new CrudServiceImpl(dslRegistry);
+    CrudServiceImpl service = new CrudServiceImpl(dslRegistry, jinjaService);
     ProviderConfiguration providerConfig = new ProviderConfiguration();
 
     EntityConfiguration entityConfig = new EntityConfiguration();
@@ -157,14 +165,14 @@ class CrudServiceImplTest {
     databasePluginConfiguration.setTable("users");
 
     assertThrows(ApiException.class, () -> {
-      service.insert(providerConfig, databasePluginConfiguration, dynamicEntity);
+      service.insert(providerConfig, databasePluginConfiguration, dynamicEntity, context);
     });
   }
 
   @Test
   @DisplayName("test update: should throw exception when update access configuration is missing")
   void testUpdateWithMissingUpdateAccess() {
-    CrudServiceImpl service = new CrudServiceImpl(dslRegistry);
+    CrudServiceImpl service = new CrudServiceImpl(dslRegistry, jinjaService);
     ProviderConfiguration providerConfig = new ProviderConfiguration();
 
     EntityConfiguration entityConfig = new EntityConfiguration();
@@ -180,14 +188,14 @@ class CrudServiceImplTest {
     databasePluginConfiguration.setTable("users");
 
     assertThrows(ApiException.class, () -> {
-      service.update(providerConfig, databasePluginConfiguration, "1", dynamicEntity);
+      service.update(providerConfig, databasePluginConfiguration, "1", dynamicEntity, context);
     });
   }
 
   @Test
   @DisplayName("test patch: should throw exception when patch access configuration is missing")
   void testPatchWithMissingUpdateAccess() {
-    CrudServiceImpl service = new CrudServiceImpl(dslRegistry);
+    CrudServiceImpl service = new CrudServiceImpl(dslRegistry, jinjaService);
     ProviderConfiguration providerConfig = new ProviderConfiguration();
 
     EntityConfiguration entityConfig = new EntityConfiguration();
@@ -203,14 +211,14 @@ class CrudServiceImplTest {
     databasePluginConfiguration.setTable("users");
 
     assertThrows(ApiException.class, () -> {
-      service.patch(providerConfig, databasePluginConfiguration, "1", dynamicEntity);
+      service.patch(providerConfig, databasePluginConfiguration, "1", dynamicEntity, context);
     });
   }
 
   @Test
   @DisplayName("test resolveIdColumn: should throw exception when no primary key configured for patch")
   void testPatchWithoutPrimaryKey() {
-    CrudServiceImpl service = new CrudServiceImpl(dslRegistry);
+    CrudServiceImpl service = new CrudServiceImpl(dslRegistry, jinjaService);
     ProviderConfiguration providerConfig = new ProviderConfiguration();
 
     EntityConfiguration entityConfig = new EntityConfiguration();
@@ -227,7 +235,7 @@ class CrudServiceImplTest {
     databasePluginConfiguration.setTable("users");
 
     ApiException exception = assertThrows(ApiException.class, () -> {
-      service.patch(providerConfig, databasePluginConfiguration, "1", dynamicEntity);
+      service.patch(providerConfig, databasePluginConfiguration, "1", dynamicEntity, context);
     });
 
     assertEquals("dpp.error.noPrimary", exception.getMessage());

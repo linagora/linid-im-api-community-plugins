@@ -36,3 +36,16 @@ INSERT INTO test_table_3 (id, name, email) VALUES
     ('id_1', 'Alice Dupont', 'alice.dupont@example.com'),
     ('id_2', 'Bob Martin', 'bob.martin@example.com'),
     ('id_3', 'Charlie Bernard', 'charlie.bernard@example.com');
+
+---------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS test_table_4 (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(100),
+    email VARCHAR(255)
+);
+
+INSERT INTO test_table_4 (name, email) VALUES
+    ('Alice Dupont', 'alice.dupont@example.com'),
+    ('Bob Martin', 'bob.martin@example.com'),
+    ('Charlie Bernard', 'charlie.bernard@example.com');

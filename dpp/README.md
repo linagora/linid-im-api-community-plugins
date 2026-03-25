@@ -33,12 +33,24 @@ entities:
     provider: ExampleDatabase
     tasks:
       - type: entity-mapper
-        phases: ['afterCreate', 'afterUpdate', 'afterFindById', 'afterFindAll']
+        phases: ["afterCreate", "afterUpdate", "afterFindById", "afterFindAll"]
         mapping:
-          username: '{{ entity.LOGIN }}'
+          username: "{{ entity.LOGIN }}"
     access:
       create:
         table: ACCOUNT_TABLE_NAME
+        assignmentFieldExpressions:
+          name:
+            expression: "{0}"
+            parameters:
+              - "{{ 'Jean' ~ ' Dupont' }}"
+            dependsOn: []
+          period:
+            expression: "tstzrange({0}::timestamptz, {1}::timestamptz, '[)')"
+            parameters:
+              - "2026-01-24 17:00:00+01"
+              - "2026-12-25 17:00:00+01"
+            dependsOn: []
       update:
         table: ACCOUNT_TABLE_NAME
       delete:
@@ -65,20 +77,28 @@ entities:
 
 ### Configuration Fields
 
-| Key                                         | Required | Description                                                               |
-| ------------------------------------------- | -------- | ------------------------------------------------------------------------- |
-| `providers[].name`                          | ✅       | Unique identifier for the database provider                               |
-| `providers[].type`                          | ✅       | Must be `database` to activate this plugin                                |
-| `providers[].url`                           | ✅       | JDBC connection URL (PostgreSQL format: `jdbc:postgresql://host:port/db`) |
-| `providers[].username`                      | ✅       | Database authentication username                                          |
-| `providers[].password`                      | ✅       | Database authentication password                                          |
-| `providers[].maximumPoolSize`               | ❌       | Maximum number of connections in the pool (default: 10)                   |
-| `providers[].idleTimeout`                   | ❌       | Maximum idle time for connections in the pool (default: 600000 ms)        |
-| `providers[].connectionTimeout`             | ❌       | Maximum time to wait for a connection from the pool (default: 30000 ms)   |
-| `entities[].provider`                       | ✅       | Reference to the database provider name                                   |
-| `entities[].access.table`                   | ✅       | Target database table name for this entity                                |
-| `entities[].attributes[].access.column`     | ✅       | Target database column name for this attribute                            |
-| `entities[].attributes[].access.primaryKey` | ❌       | Indicates if this attribute is a primary key                              |
+| Key                                                       | Required | Description                                                               |
+| --------------------------------------------------------- | -------- | ------------------------------------------------------------------------- |
+| `providers[].name`                                        | ✅       | Unique identifier for the database provider                               |
+| `providers[].type`                                        | ✅       | Must be `database` to activate this plugin                                |
+| `providers[].url`                                         | ✅       | JDBC connection URL (PostgreSQL format: `jdbc:postgresql://host:port/db`) |
+| `providers[].username`                                    | ✅       | Database authentication username                                          |
+| `providers[].password`                                    | ✅       | Database authentication password                                          |
+| `providers[].maximumPoolSize`                             | ❌       | Maximum number of connections in the pool (default: 10)                   |
+| `providers[].idleTimeout`                                 | ❌       | Maximum idle time for connections in the pool (default: 600000 ms)        |
+| `providers[].connectionTimeout`                           | ❌       | Maximum time to wait for a connection from the pool (default: 30000 ms)   |
+| `entities[].provider`                                     | ✅       | Reference to the database provider name                                   |
+| `entities[].access.table`                                 | ✅       | Target database table name for this entity                                |
+| `entities[].access.assignmentFieldExpressions`            | ❌       | List of expressions for assigning values                                  |
+| `entities[].access.assignmentFieldExpressions.expression` | ❌       | Template expression for assigning values                                  |
+| `entities[].access.assignmentFieldExpressions.parameters` | ❌       | Parameters for the Jinja template expression                              |
+| `entities[].access.assignmentFieldExpressions.dependsOn`  | ❌       | Dependencies for the Jinja template expression                            |
+| `entities[].access.retrievingFieldExpressions`            | ❌       | List of expressions for retrieving values                                  |
+| `entities[].access.retrievingFieldExpressions.expression` | ❌       | Template expression for retrieving values                                  |
+| `entities[].access.retrievingFieldExpressions.parameters` | ❌       | Parameters for the Jinja template expression                              |
+| `entities[].access.retrievingFieldExpressions.dependsOn`  | ❌       | Dependencies for the Jinja template expression                            |
+| `entities[].attributes[].access.column`                   | ✅       | Target database column name for this attribute                            |
+| `entities[].attributes[].access.primaryKey`               | ❌       | Indicates if this attribute is a primary key                              |
 
 ## 🛠 Behavior
 

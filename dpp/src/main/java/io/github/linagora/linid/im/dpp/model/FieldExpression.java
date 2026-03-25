@@ -26,33 +26,29 @@
 
 package io.github.linagora.linid.im.dpp.model;
 
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import java.util.Map;
+import java.util.List;
 import lombok.Data;
 
 /**
- * Configuration for a dynamic database operation.
- *
- * <p>All fields in this class support Jinja templating (e.g., using Jinjava), allowing dynamic values to be resolved at runtime
- * based on context or input data.
+ * Represents an assignment/retrieving field expression configuration.
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = false)
-public class DatabasePluginConfiguration {
+public class FieldExpression {
 
   /**
-   * The name of the database table to operate on. Supports Jinja templating.
+   * Expression string, may contain placeholders like {0}, {1},...
    */
-  private String table;
+  private String expression;
 
   /**
-   * Map of field name to assignment expression configuration.
+   * Parameters used to fill the expression (support Jinja templates).
    */
-  private Map<String, FieldExpression> assignmentFieldExpressions;
+  private List<String> parameters;
 
   /**
-   * Map of field name to retrieving expression configuration.
+   * Field names this expression depends on.
    */
-  private Map<String, FieldExpression> retrievingFieldExpressions;
+  private List<String> dependsOn;
 }

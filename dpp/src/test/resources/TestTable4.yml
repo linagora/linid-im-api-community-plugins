@@ -1,0 +1,65 @@
+name: users
+provider: POSTGRES
+tasks:
+access:
+  create:
+    table: test_table_4
+    assignmentFieldExpressions:
+      email:
+        expression: "{0}"
+        parameters:
+          - "{{ 'Test' ~ '@email.com' }}"
+        dependsOn: []
+    retrievingFieldExpressions:
+      name:
+        expression: "UPPER({0}.{1})"
+        parameters:
+          - "{{ 'test' ~ '_table_4' }}"
+          - "name"
+  update:
+    table: test_table_4
+    assignmentFieldExpressions:
+      email:
+        expression: "{0}"
+        parameters:
+          - "{{ 'Test' ~ '@email.com' }}"
+        dependsOn: []
+    retrievingFieldExpressions:
+      name:
+        expression: "UPPER({0}.{1})"
+        parameters:
+          - "{{ 'test' ~ '_table_4' }}"
+          - "name"
+  delete:
+    table: test_table_4
+  findAll:
+    table: test_table_4
+  patch:
+    table: test_table_4
+    assignmentFieldExpressions:
+      name:
+        expression: "{0}"
+        parameters:
+          - "{{ 'Test' ~ ' Assignment' }}"
+        dependsOn: [email]
+    retrievingFieldExpressions:
+      name:
+        expression: "UPPER({0}.{1})"
+        parameters:
+          - "{{ 'test' ~ '_table_4' }}"
+          - "name"
+  findById:
+    table: test_table_4
+attributes:
+  - name: id
+    type: UUID
+    required: true
+    access:
+      primaryKey: true
+      column: id
+  - name: userName
+    access:
+      column: name
+  - name: userEmail
+    access:
+      column: email

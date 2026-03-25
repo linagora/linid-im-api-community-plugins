@@ -77,11 +77,13 @@ public interface CrudService {
    * @param config the provider configuration (datasource credentials, pool settings)
    * @param databaseConfiguration the database configuration containing the table name
    * @param dynamicEntity the dynamic entity containing the table name and values in its configuration
+   * @param context the task execution context
    * @return the inserted entity
    */
   DynamicEntity insert(ProviderConfiguration config,
                        DatabasePluginConfiguration databaseConfiguration,
-                       DynamicEntity dynamicEntity);
+                       DynamicEntity dynamicEntity,
+                       TaskExecutionContext context);
 
   /**
    * Updates rows in the given table where the id column matches the given value.
@@ -95,7 +97,8 @@ public interface CrudService {
   DynamicEntity update(ProviderConfiguration config,
                        DatabasePluginConfiguration databaseConfiguration,
                        Object id,
-                       DynamicEntity dynamicEntity);
+                       DynamicEntity dynamicEntity,
+                       TaskExecutionContext context);
 
   /**
    * Updates rows in the given table where the id column matches the given value.
@@ -109,7 +112,8 @@ public interface CrudService {
   DynamicEntity patch(ProviderConfiguration config,
                       DatabasePluginConfiguration databaseConfiguration,
                       Object id,
-                      DynamicEntity dynamicEntity);
+                      DynamicEntity dynamicEntity,
+                      TaskExecutionContext context);
 
   /**
    * Deletes rows from the given table where the id column matches the given value.

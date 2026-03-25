@@ -30,7 +30,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.hubspot.jinjava.Jinjava;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
+import io.github.linagora.linid.im.corelib.plugin.config.JinjaService;
 import io.github.linagora.linid.im.corelib.plugin.config.dto.ProviderConfiguration;
 import io.github.linagora.linid.im.corelib.plugin.entity.DynamicEntity;
 import io.github.linagora.linid.im.corelib.plugin.task.TaskExecutionContext;
@@ -41,6 +43,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.AfterAll;
@@ -70,8 +73,9 @@ class DatabaseProviderPluginE2ETest {
     providerConfiguration.addOption("url", jdbcUrl);
     providerConfiguration.addOption("username", user);
     providerConfiguration.addOption("password", password);
+    var jinjaService = new JinjaServiceTest();
     dslRegistry = new DslRegistry();
-    var crudService = new CrudServiceImpl(dslRegistry);
+    var crudService = new CrudServiceImpl(dslRegistry, jinjaService);
     provider = new DatabaseProviderPlugin(crudService);
   }
 
@@ -98,10 +102,7 @@ class DatabaseProviderPluginE2ETest {
     var context = new TaskExecutionContext();
     DynamicEntity entity = DynamicEntityHelper.getEntity("TestTable1.yml");
     Map<String, Object> attrs = Map.of(
-            "userName", "testCreate",
-            "userEmail", "test@example.com",
-            "age", 30,
-            "isValid", true);
+        "userName", "testCreate", "userEmail", "test@example.com", "age", 30, "isValid", true);
     entity.setAttributes(attrs);
     var result = provider.create(context, providerConfiguration, entity);
     assertEquals(5, result.getAttributes().size());
@@ -117,17 +118,19 @@ class DatabaseProviderPluginE2ETest {
   @DisplayName("Test create: should insert user in table test_table_2")
   void testCreateTestTable2() throws IOException, SQLException {
     var context = new TaskExecutionContext();
+
     DynamicEntity entity = DynamicEntityHelper.getEntity("TestTable2.yml");
     Map<String, Object> attrs = Map.of(
-            "userName", "testCreate",
-            "userEmail", "test@example.com");
+        "userName", "testCreate",
+        "userEmail", "test@example.com");
     entity.setAttributes(attrs);
     var result = provider.create(context, providerConfiguration, entity);
     assertEquals(3, result.getAttributes().size());
     assertTrue(result.getAttributes().containsKey("id"));
     assertEquals("testCreate", result.getAttributes().get("userName"));
     assertEquals("test@example.com", result.getAttributes().get("userEmail"));
-    DatabaseTestUtils.deleteOne(stmt, "test_table_2", "email", "test@example.com");
+    DatabaseTestUtils.deleteOne(stmt, "test_table_2", "email",
+        "test@example.com");
   }
 
   @Test
@@ -136,9 +139,9 @@ class DatabaseProviderPluginE2ETest {
     var context = new TaskExecutionContext();
     DynamicEntity entity = DynamicEntityHelper.getEntity("TestTable3.yml");
     Map<String, Object> attrs = Map.of(
-            "id", "id_4",
-            "userName", "testCreate",
-            "userEmail", "test@example.com");
+        "id", "id_4",
+        "userName", "testCreate",
+        "userEmail", "test@example.com");
     entity.setAttributes(attrs);
     var result = provider.create(context, providerConfiguration, entity);
     assertEquals(3, result.getAttributes().size());
@@ -149,19 +152,46 @@ class DatabaseProviderPluginE2ETest {
   }
 
   @Test
+  @DisplayName("Test create: should insert user in table test_table_4")
+  void testCreateTestTable4() throws IOException, SQLException {
+    var context = new TaskExecutionContext();
+
+    DatabaseTestUtils.deleteOne(stmt, "test_table_4", "email", "test@example.com");
+
+    DynamicEntity entity = DynamicEntityHelper.getEntity("TestTable4.yml");
+    Map<String, Object> attrs = Map.of(
+        "userName", "testCreate",
+        "userEmail", "test@example.com");
+    entity.setAttributes(attrs);
+    var updateResult = provider.create(context, providerConfiguration, entity);
+    assertEquals(3, updateResult.getAttributes().size());
+    assertTrue(updateResult.getAttributes().containsKey("id"));
+    assertEquals("TESTCREATE", updateResult.getAttributes().get("userName"));
+    assertEquals("Test@email.com", updateResult.getAttributes().get("userEmail"));
+    var result = DatabaseTestUtils.fetchOne(stmt, "test_table_4", "email", "Test@email.com");
+    assertEquals("testCreate", result.get("name"));
+    assertEquals("Test@email.com", result.get("email"));
+    DatabaseTestUtils.deleteOne(stmt, "test_table_4", "email",
+        "Test@email.com");
+  }
+
+  @Test
   @DisplayName("Test create exceptions: test that creating a user with email"
       + "that already exists in table test_table_1 should throw ApiException")
   void testCreateExceptions() throws IOException {
     var context = new TaskExecutionContext();
     DynamicEntity entity = DynamicEntityHelper.getEntity("TestTable1.yml");
     Map<String, Object> attrs = Map.of(
-            "userName", "testCreate",
-            "userEmail", "alice.dupont@example.com",
-            "age", 30,
-            "isValid", true);
+        "userName",
+        "testCreate",
+        "userEmail",
+        "alice.dupont@example.com",
+        "age",
+        30,
+        "isValid",
+        true);
     entity.setAttributes(attrs);
-    assertThrows(ApiException.class, () -> provider.create(context,
-            providerConfiguration, entity));
+    assertThrows(ApiException.class, () -> provider.create(context, providerConfiguration, entity));
   }
 
   @Test
@@ -169,19 +199,16 @@ class DatabaseProviderPluginE2ETest {
   void testDeleteTestTable1() throws IOException, SQLException {
     var context = new TaskExecutionContext();
     var id = DatabaseTestUtils.insertOne(
-            stmt,
-            "test_table_1",
-            new String[] { "name", "email", "age", "is_valid" },
-            new String[] { "'testDelete1'", "'test@example.com'", "21", "true" });
+        stmt,
+        "test_table_1",
+        new String[] { "name", "email", "age", "is_valid" },
+        new String[] { "'testDelete1'", "'test@example.com'", "21", "true" });
     DynamicEntity entity = DynamicEntityHelper.getEntity("TestTable1.yml");
-    Map<String, Object> attrs = Map.of(
-            "id", id);
+    Map<String, Object> attrs = Map.of("id", id);
     entity.setAttributes(attrs);
-    boolean deleted = provider.delete(context, providerConfiguration,
-            String.valueOf(id), entity);
+    boolean deleted = provider.delete(context, providerConfiguration, String.valueOf(id), entity);
     assertEquals(true, deleted);
-    var result = DatabaseTestUtils.fetchOne(stmt, "test_table_1", "email",
-            "test@example.com");
+    var result = DatabaseTestUtils.fetchOne(stmt, "test_table_1", "email", "test@example.com");
     assertEquals(true, result.isEmpty());
   }
 
@@ -190,19 +217,16 @@ class DatabaseProviderPluginE2ETest {
   void testDeleteTestTable2() throws IOException, SQLException {
     var context = new TaskExecutionContext();
     var id = DatabaseTestUtils.insertOne(
-            stmt,
-            "test_table_2",
-            new String[] { "name", "email" },
-            new String[] { "'testDelete1'", "'test@example.com'" });
+        stmt,
+        "test_table_2",
+        new String[] { "name", "email" },
+        new String[] { "'testDelete1'", "'test@example.com'" });
     DynamicEntity entity = DynamicEntityHelper.getEntity("TestTable2.yml");
-    Map<String, Object> attrs = Map.of(
-            "id", id);
+    Map<String, Object> attrs = Map.of("id", id);
     entity.setAttributes(attrs);
-    boolean deleted = provider.delete(context, providerConfiguration,
-            String.valueOf(id), entity);
+    boolean deleted = provider.delete(context, providerConfiguration, String.valueOf(id), entity);
     assertEquals(true, deleted);
-    var result = DatabaseTestUtils.fetchOne(stmt, "test_table_2", "email",
-            "test@example.com");
+    var result = DatabaseTestUtils.fetchOne(stmt, "test_table_2", "email", "test@example.com");
     assertEquals(true, result.isEmpty());
   }
 
@@ -211,19 +235,16 @@ class DatabaseProviderPluginE2ETest {
   void testDeleteTestTable3() throws IOException, SQLException {
     var context = new TaskExecutionContext();
     var id = DatabaseTestUtils.insertOne(
-            stmt,
-            "test_table_3",
-            new String[] { "id", "name", "email" },
-            new String[] { "'id_4'", "'testDelete1'", "'test@example.com'" });
+        stmt,
+        "test_table_3",
+        new String[] { "id", "name", "email" },
+        new String[] { "'id_4'", "'testDelete1'", "'test@example.com'" });
     DynamicEntity entity = DynamicEntityHelper.getEntity("TestTable3.yml");
-    Map<String, Object> attrs = Map.of(
-            "id", id);
+    Map<String, Object> attrs = Map.of("id", id);
     entity.setAttributes(attrs);
-    boolean deleted = provider.delete(context, providerConfiguration,
-            String.valueOf(id), entity);
+    boolean deleted = provider.delete(context, providerConfiguration, String.valueOf(id), entity);
     assertEquals(true, deleted);
-    var result = DatabaseTestUtils.fetchOne(stmt, "test_table_3", "email",
-            "test@example.com");
+    var result = DatabaseTestUtils.fetchOne(stmt, "test_table_3", "email", "test@example.com");
     assertEquals(true, result.isEmpty());
   }
 
@@ -232,8 +253,9 @@ class DatabaseProviderPluginE2ETest {
   void testDeleteNonExisting() throws IOException {
     var context = new TaskExecutionContext();
     DynamicEntity entity = DynamicEntityHelper.getEntity("TestTable1.yml");
-    assertThrows(ApiException.class, () -> provider.delete(context,
-            providerConfiguration, "999999", entity));
+    assertThrows(
+        ApiException.class,
+        () -> provider.delete(context, providerConfiguration, "999999", entity));
   }
 
   @Test
@@ -241,26 +263,28 @@ class DatabaseProviderPluginE2ETest {
   void testUpdateTestTable1() throws IOException, SQLException {
     var context = new TaskExecutionContext();
     var id = DatabaseTestUtils.insertOne(
-            stmt,
-            "test_table_1",
-            new String[] { "name", "email", "age", "is_valid" },
-            new String[] { "'test'", "'test@example.com'", "21", "true" });
+        stmt,
+        "test_table_1",
+        new String[] { "name", "email", "age", "is_valid" },
+        new String[] { "'testUpdate'", "'test@example.com'", "21", "true" });
     DynamicEntity entity = DynamicEntityHelper.getEntity("TestTable1.yml");
     Map<String, Object> attrs = Map.of(
-            "userName", "testUpdated",
-            "userEmail", "test-updated@example.com",
-            "age", 42,
-            "isValid", false);
+        "userName",
+        "testUpdated",
+        "userEmail",
+        "test-updated@example.com",
+        "age",
+        42,
+        "isValid",
+        false);
     entity.setAttributes(attrs);
     provider.update(context, providerConfiguration, String.valueOf(id), entity);
-    var result = DatabaseTestUtils.fetchOne(stmt, "test_table_1", "email",
-            "test-updated@example.com");
+    var result = DatabaseTestUtils.fetchOne(stmt, "test_table_1", "email", "test-updated@example.com");
     assertEquals("testUpdated", result.get("name"));
     assertEquals("test-updated@example.com", result.get("email"));
     assertEquals(42, result.get("age"));
     assertEquals(false, result.get("is_valid"));
-    DatabaseTestUtils.deleteOne(stmt, "test_table_1", "email",
-            "test-updated@example.com");
+    DatabaseTestUtils.deleteOne(stmt, "test_table_1", "email", "test-updated@example.com");
   }
 
   @Test
@@ -268,22 +292,20 @@ class DatabaseProviderPluginE2ETest {
   void testUpdateTestTable2() throws IOException, SQLException {
     var context = new TaskExecutionContext();
     var id = DatabaseTestUtils.insertOne(
-            stmt,
-            "test_table_2",
-            new String[] { "name", "email" },
-            new String[] { "'test'", "'test@example.com'" });
+        stmt,
+        "test_table_2",
+        new String[] { "name", "email" },
+        new String[] { "'test'", "'test@example.com'" });
     DynamicEntity entity = DynamicEntityHelper.getEntity("TestTable2.yml");
     Map<String, Object> attrs = Map.of(
-            "userName", "testUpdated",
-            "userEmail", "test-updated@example.com");
+        "userName", "testUpdated",
+        "userEmail", "test-updated@example.com");
     entity.setAttributes(attrs);
     provider.update(context, providerConfiguration, String.valueOf(id), entity);
-    var result = DatabaseTestUtils.fetchOne(stmt, "test_table_2", "email",
-            "test-updated@example.com");
+    var result = DatabaseTestUtils.fetchOne(stmt, "test_table_2", "email", "test-updated@example.com");
     assertEquals("testUpdated", result.get("name"));
     assertEquals("test-updated@example.com", result.get("email"));
-    DatabaseTestUtils.deleteOne(stmt, "test_table_2", "email",
-            "test-updated@example.com");
+    DatabaseTestUtils.deleteOne(stmt, "test_table_2", "email", "test-updated@example.com");
   }
 
   @Test
@@ -291,23 +313,43 @@ class DatabaseProviderPluginE2ETest {
   void testUpdateTestTable3() throws IOException, SQLException {
     var context = new TaskExecutionContext();
     var id = DatabaseTestUtils.insertOne(
-            stmt,
-            "test_table_3",
-            new String[] { "id", "name", "email" },
-            new String[] { "'id_4'", "'test'", "'test@example.com'" });
+        stmt,
+        "test_table_3",
+        new String[] { "id", "name", "email" },
+        new String[] { "'id_4'", "'test'", "'test@example.com'" });
     DynamicEntity entity = DynamicEntityHelper.getEntity("TestTable3.yml");
     Map<String, Object> attrs = Map.of(
-            "id", "id_4",
-            "userName", "testUpdated",
-            "userEmail", "test-updated@example.com");
+        "id", "id_4",
+        "userName", "testUpdated",
+        "userEmail", "test-updated@example.com");
     entity.setAttributes(attrs);
     provider.update(context, providerConfiguration, String.valueOf(id), entity);
-    var result = DatabaseTestUtils.fetchOne(stmt, "test_table_3", "email",
-            "test-updated@example.com");
+    var result = DatabaseTestUtils.fetchOne(stmt, "test_table_3", "email", "test-updated@example.com");
     assertEquals("testUpdated", result.get("name"));
     assertEquals("test-updated@example.com", result.get("email"));
-    DatabaseTestUtils.deleteOne(stmt, "test_table_3", "email",
-            "test-updated@example.com");
+    DatabaseTestUtils.deleteOne(stmt, "test_table_3", "email", "test-updated@example.com");
+  }
+
+  @Test
+  @DisplayName("Test update: should update user in table test_table_4")
+  void testUpdateTestTable4() throws IOException, SQLException {
+    var context = new TaskExecutionContext();
+    var id = DatabaseTestUtils.insertOne(
+        stmt,
+        "test_table_4",
+        new String[] { "name", "email" },
+        new String[] { "'test'", "'test@example.com'" });
+    DynamicEntity entity = DynamicEntityHelper.getEntity("TestTable4.yml");
+    Map<String, Object> attrs = Map.of(
+        "userName", "testUpdated",
+        "userEmail", "test-updated@example.com");
+    entity.setAttributes(attrs);
+    DynamicEntity updateResult = provider.update(context, providerConfiguration, String.valueOf(id), entity);
+    assertEquals("TESTUPDATED", updateResult.getAttributes().get("userName"));
+    var result = DatabaseTestUtils.fetchOne(stmt, "test_table_4", "email", "Test@email.com");
+    assertEquals("testUpdated", result.get("name"));
+    assertEquals("Test@email.com", result.get("email"));
+    DatabaseTestUtils.deleteOne(stmt, "test_table_4", "email", "Test@email.com");
   }
 
   @Test
@@ -317,8 +359,9 @@ class DatabaseProviderPluginE2ETest {
     DynamicEntity entity = DynamicEntityHelper.getEntity("TestTable1.yml");
     Map<String, Object> attrs = Map.of("id", "999999");
     entity.setAttributes(attrs);
-    assertThrows(ApiException.class, () -> provider.update(context,
-            providerConfiguration, "999999", entity));
+    assertThrows(
+        ApiException.class,
+        () -> provider.update(context, providerConfiguration, "999999", entity));
   }
 
   @Test
@@ -326,24 +369,20 @@ class DatabaseProviderPluginE2ETest {
   void testFindAllTestTable1() throws IOException {
     var context = new TaskExecutionContext();
     DynamicEntity entity = DynamicEntityHelper.getEntity("TestTable1.yml");
-    Page<DynamicEntity> result = provider.findAll(context, providerConfiguration,
-            null, PageRequest.of(0, 10), entity);
+    Page<DynamicEntity> result = provider.findAll(context, providerConfiguration, null,
+        PageRequest.of(0, 10), entity);
     assertEquals(3, result.getTotalElements());
     List<DynamicEntity> users = result.getContent();
     assertEquals("Alice Dupont", users.get(0).getAttributes().get("userName"));
-    assertEquals("alice.dupont@example.com",
-            users.get(0).getAttributes().get("userEmail"));
+    assertEquals("alice.dupont@example.com", users.get(0).getAttributes().get("userEmail"));
     assertEquals(32, users.get(0).getAttributes().get("age"));
     assertEquals(true, users.get(0).getAttributes().get("isValid"));
     assertEquals("Bob Martin", users.get(1).getAttributes().get("userName"));
-    assertEquals("bob.martin@example.com",
-            users.get(1).getAttributes().get("userEmail"));
+    assertEquals("bob.martin@example.com", users.get(1).getAttributes().get("userEmail"));
     assertEquals(18, users.get(1).getAttributes().get("age"));
     assertEquals(false, users.get(1).getAttributes().get("isValid"));
-    assertEquals("Charlie Bernard",
-            users.get(2).getAttributes().get("userName"));
-    assertEquals("charlie.bernard@example.com",
-            users.get(2).getAttributes().get("userEmail"));
+    assertEquals("Charlie Bernard", users.get(2).getAttributes().get("userName"));
+    assertEquals("charlie.bernard@example.com", users.get(2).getAttributes().get("userEmail"));
     assertEquals(54, users.get(2).getAttributes().get("age"));
     assertEquals(true, users.get(2).getAttributes().get("isValid"));
   }
@@ -353,20 +392,16 @@ class DatabaseProviderPluginE2ETest {
   void testFindAllTestTable2() throws IOException {
     var context = new TaskExecutionContext();
     DynamicEntity entity = DynamicEntityHelper.getEntity("TestTable2.yml");
-    Page<DynamicEntity> result = provider.findAll(context, providerConfiguration,
-            null, PageRequest.of(0, 10), entity);
+    Page<DynamicEntity> result = provider.findAll(context, providerConfiguration, null,
+        PageRequest.of(0, 10), entity);
     assertEquals(3, result.getTotalElements());
     List<DynamicEntity> users = result.getContent();
     assertEquals("Alice Dupont", users.get(0).getAttributes().get("userName"));
-    assertEquals("alice.dupont@example.com",
-            users.get(0).getAttributes().get("userEmail"));
+    assertEquals("alice.dupont@example.com", users.get(0).getAttributes().get("userEmail"));
     assertEquals("Bob Martin", users.get(1).getAttributes().get("userName"));
-    assertEquals("bob.martin@example.com",
-            users.get(1).getAttributes().get("userEmail"));
-    assertEquals("Charlie Bernard",
-            users.get(2).getAttributes().get("userName"));
-    assertEquals("charlie.bernard@example.com",
-            users.get(2).getAttributes().get("userEmail"));
+    assertEquals("bob.martin@example.com", users.get(1).getAttributes().get("userEmail"));
+    assertEquals("Charlie Bernard", users.get(2).getAttributes().get("userName"));
+    assertEquals("charlie.bernard@example.com", users.get(2).getAttributes().get("userEmail"));
   }
 
   @Test
@@ -374,20 +409,16 @@ class DatabaseProviderPluginE2ETest {
   void testFindAllTestTable3() throws IOException {
     var context = new TaskExecutionContext();
     DynamicEntity entity = DynamicEntityHelper.getEntity("TestTable3.yml");
-    Page<DynamicEntity> result = provider.findAll(context, providerConfiguration,
-            null, PageRequest.of(0, 10), entity);
+    Page<DynamicEntity> result = provider.findAll(context, providerConfiguration, null,
+        PageRequest.of(0, 10), entity);
     assertEquals(3, result.getTotalElements());
     List<DynamicEntity> users = result.getContent();
     assertEquals("Alice Dupont", users.get(0).getAttributes().get("userName"));
-    assertEquals("alice.dupont@example.com",
-            users.get(0).getAttributes().get("userEmail"));
+    assertEquals("alice.dupont@example.com", users.get(0).getAttributes().get("userEmail"));
     assertEquals("Bob Martin", users.get(1).getAttributes().get("userName"));
-    assertEquals("bob.martin@example.com",
-            users.get(1).getAttributes().get("userEmail"));
-    assertEquals("Charlie Bernard",
-            users.get(2).getAttributes().get("userName"));
-    assertEquals("charlie.bernard@example.com",
-            users.get(2).getAttributes().get("userEmail"));
+    assertEquals("bob.martin@example.com", users.get(1).getAttributes().get("userEmail"));
+    assertEquals("Charlie Bernard", users.get(2).getAttributes().get("userName"));
+    assertEquals("charlie.bernard@example.com", users.get(2).getAttributes().get("userEmail"));
   }
 
   @Test
@@ -395,16 +426,15 @@ class DatabaseProviderPluginE2ETest {
   void testPatchTestTable1() throws IOException, SQLException {
     var context = new TaskExecutionContext();
     var id = DatabaseTestUtils.insertOne(
-            stmt,
-            "test_table_1",
-            new String[] { "name", "email", "age", "is_valid" },
-            new String[] { "'test'", "'test@example.com'", "21", "true" });
+        stmt,
+        "test_table_1",
+        new String[] { "name", "email", "age", "is_valid" },
+        new String[] { "'test'", "'test@example.com'", "21", "true" });
     DynamicEntity entity = DynamicEntityHelper.getEntity("TestTable1.yml");
     Map<String, Object> attrs = Map.of("userName", "testUpdated");
     entity.setAttributes(attrs);
     provider.patch(context, providerConfiguration, String.valueOf(id), entity);
-    var result = DatabaseTestUtils.fetchOne(stmt, "test_table_1", "name",
-            "testUpdated");
+    var result = DatabaseTestUtils.fetchOne(stmt, "test_table_1", "name", "testUpdated");
     assertEquals("testUpdated", result.get("name"));
     assertEquals("test@example.com", result.get("email"));
     assertEquals(21, result.get("age"));
@@ -412,8 +442,7 @@ class DatabaseProviderPluginE2ETest {
     attrs = Map.of("age", 32);
     entity.setAttributes(attrs);
     provider.patch(context, providerConfiguration, String.valueOf(id), entity);
-    result = DatabaseTestUtils.fetchOne(stmt, "test_table_1", "name",
-            "testUpdated");
+    result = DatabaseTestUtils.fetchOne(stmt, "test_table_1", "name", "testUpdated");
     assertEquals("testUpdated", result.get("name"));
     assertEquals("test@example.com", result.get("email"));
     assertEquals(32, result.get("age"));
@@ -421,14 +450,12 @@ class DatabaseProviderPluginE2ETest {
     attrs = Map.of("isValid", false);
     entity.setAttributes(attrs);
     provider.patch(context, providerConfiguration, String.valueOf(id), entity);
-    result = DatabaseTestUtils.fetchOne(stmt, "test_table_1", "name",
-            "testUpdated");
+    result = DatabaseTestUtils.fetchOne(stmt, "test_table_1", "name", "testUpdated");
     assertEquals("testUpdated", result.get("name"));
     assertEquals("test@example.com", result.get("email"));
     assertEquals(32, result.get("age"));
     assertEquals(false, result.get("is_valid"));
-    DatabaseTestUtils.deleteOne(stmt, "test_table_1", "email",
-            "test@example.com");
+    DatabaseTestUtils.deleteOne(stmt, "test_table_1", "email", "test@example.com");
   }
 
   @Test
@@ -436,20 +463,18 @@ class DatabaseProviderPluginE2ETest {
   void testPatchTestTable2() throws IOException, SQLException {
     var context = new TaskExecutionContext();
     var id = DatabaseTestUtils.insertOne(
-            stmt,
-            "test_table_2",
-            new String[] { "name", "email" },
-            new String[] { "'test'", "'test@example.com'" });
+        stmt,
+        "test_table_2",
+        new String[] { "name", "email" },
+        new String[] { "'test'", "'test@example.com'" });
     DynamicEntity entity = DynamicEntityHelper.getEntity("TestTable2.yml");
     Map<String, Object> attrs = Map.of("userName", "testUpdated");
     entity.setAttributes(attrs);
     provider.patch(context, providerConfiguration, String.valueOf(id), entity);
-    var result = DatabaseTestUtils.fetchOne(stmt, "test_table_2", "name",
-            "testUpdated");
+    var result = DatabaseTestUtils.fetchOne(stmt, "test_table_2", "name", "testUpdated");
     assertEquals("testUpdated", result.get("name"));
     assertEquals("test@example.com", result.get("email"));
-    DatabaseTestUtils.deleteOne(stmt, "test_table_2", "email",
-            "test@example.com");
+    DatabaseTestUtils.deleteOne(stmt, "test_table_2", "email", "test@example.com");
   }
 
   @Test
@@ -457,20 +482,57 @@ class DatabaseProviderPluginE2ETest {
   void testPatchTestTable3() throws IOException, SQLException {
     var context = new TaskExecutionContext();
     var id = DatabaseTestUtils.insertOne(
-            stmt,
-            "test_table_3",
-            new String[] { "id", "name", "email" },
-            new String[] { "'id_4'", "'test'", "'test@example.com'" });
+        stmt,
+        "test_table_3",
+        new String[] { "id", "name", "email" },
+        new String[] { "'id_4'", "'test'", "'test@example.com'" });
     DynamicEntity entity = DynamicEntityHelper.getEntity("TestTable3.yml");
     Map<String, Object> attrs = Map.of("userName", "testUpdated");
     entity.setAttributes(attrs);
     provider.patch(context, providerConfiguration, String.valueOf(id), entity);
-    var result = DatabaseTestUtils.fetchOne(stmt, "test_table_3", "name",
-            "testUpdated");
+    var result = DatabaseTestUtils.fetchOne(stmt, "test_table_3", "name", "testUpdated");
     assertEquals("testUpdated", result.get("name"));
     assertEquals("test@example.com", result.get("email"));
-    DatabaseTestUtils.deleteOne(stmt, "test_table_3", "email",
-            "test@example.com");
+    DatabaseTestUtils.deleteOne(stmt, "test_table_3", "email", "test@example.com");
+  }
+
+  @Test
+  @DisplayName("Test patch: should patch user in table test_table_4(check assignment field expression)")
+  void testPatchTestTable4Name() throws IOException, SQLException {
+    var context = new TaskExecutionContext();
+
+    var id = DatabaseTestUtils.insertOne(
+        stmt, "test_table_4", new String[] { "name", "email" },
+        new String[] { "'test'", "'test@example.com'" });
+    DynamicEntity entity = DynamicEntityHelper.getEntity("TestTable4.yml");
+    Map<String, Object> attrs = Map.of("userName", "testUpdated");
+    entity.setAttributes(attrs);
+    var patchResult = provider.patch(context, providerConfiguration, String.valueOf(id), entity);
+    assertEquals("TESTUPDATED", patchResult.getAttributes().get("userName"));
+    assertEquals("test@example.com", patchResult.getAttributes().get("userEmail"));
+    var result = DatabaseTestUtils.fetchOne(stmt, "test_table_4", "name", "testUpdated");
+    assertEquals("testUpdated", result.get("name"));
+    assertEquals("test@example.com", result.get("email"));
+    DatabaseTestUtils.deleteOne(stmt, "test_table_4", "name", "testUpdated");
+  }
+
+  @Test
+  @DisplayName("Test patch: should patch user in table test_table_4(check retrieve field expression)")
+  void testPatchTestTable4Email() throws IOException, SQLException {
+    var context = new TaskExecutionContext();
+
+    var id = DatabaseTestUtils.insertOne(
+        stmt, "test_table_4", new String[] { "name", "email" },
+        new String[] { "'test'", "'test@example.com'" });
+    DynamicEntity entity = DynamicEntityHelper.getEntity("TestTable4.yml");
+    Map<String, Object> attrs = Map.of("userEmail", "testUpdated@example.com");
+    entity.setAttributes(attrs);
+    var patchResult = provider.patch(context, providerConfiguration, String.valueOf(id), entity);
+    assertEquals("TEST ASSIGNMENT", patchResult.getAttributes().get("userName"));
+    var result = DatabaseTestUtils.fetchOne(stmt, "test_table_4", "name", "Test Assignment");
+    assertEquals("Test Assignment", result.get("name"));
+    assertEquals("testUpdated@example.com", result.get("email"));
+    DatabaseTestUtils.deleteOne(stmt, "test_table_4", "name", "Test Assignment");
   }
 
   @Test
@@ -480,8 +542,9 @@ class DatabaseProviderPluginE2ETest {
     DynamicEntity entity = DynamicEntityHelper.getEntity("TestTable1.yml");
     Map<String, Object> attrs = Map.of("id", "999999");
     entity.setAttributes(attrs);
-    assertThrows(ApiException.class, () -> provider.patch(context,
-            providerConfiguration, "999999", entity));
+    assertThrows(
+        ApiException.class,
+        () -> provider.patch(context, providerConfiguration, "999999", entity));
   }
 
   @Test
@@ -489,11 +552,9 @@ class DatabaseProviderPluginE2ETest {
   void testFindByIdTestTable1() throws IOException {
     var context = new TaskExecutionContext();
     DynamicEntity entity = DynamicEntityHelper.getEntity("TestTable1.yml");
-    DynamicEntity user = provider.findById(context, providerConfiguration, "1",
-            entity);
+    DynamicEntity user = provider.findById(context, providerConfiguration, "1", entity);
     assertEquals("Alice Dupont", user.getAttributes().get("userName"));
-    assertEquals("alice.dupont@example.com",
-            user.getAttributes().get("userEmail"));
+    assertEquals("alice.dupont@example.com", user.getAttributes().get("userEmail"));
     assertEquals(32, user.getAttributes().get("age"));
     assertEquals(true, user.getAttributes().get("isValid"));
   }
@@ -503,14 +564,11 @@ class DatabaseProviderPluginE2ETest {
   void testFindByIdTestTable2() throws IOException, SQLException {
     var context = new TaskExecutionContext();
     DynamicEntity entity = DynamicEntityHelper.getEntity("TestTable2.yml");
-    var result = DatabaseTestUtils.fetchOne(stmt, "test_table_2", "name",
-            "Alice Dupont");
-    DynamicEntity user = provider.findById(context, providerConfiguration,
-            result.get("id").toString(),
-            entity);
+    var result = DatabaseTestUtils.fetchOne(stmt, "test_table_2", "name", "Alice Dupont");
+    DynamicEntity user = provider.findById(context, providerConfiguration, result.get("id").toString(),
+        entity);
     assertEquals("Alice Dupont", user.getAttributes().get("userName"));
-    assertEquals("alice.dupont@example.com",
-            user.getAttributes().get("userEmail"));
+    assertEquals("alice.dupont@example.com", user.getAttributes().get("userEmail"));
   }
 
   @Test
@@ -518,11 +576,9 @@ class DatabaseProviderPluginE2ETest {
   void testFindByIdTestTable3() throws IOException {
     var context = new TaskExecutionContext();
     DynamicEntity entity = DynamicEntityHelper.getEntity("TestTable3.yml");
-    DynamicEntity user = provider.findById(context, providerConfiguration,
-            "id_1", entity);
+    DynamicEntity user = provider.findById(context, providerConfiguration, "id_1", entity);
     assertEquals("Alice Dupont", user.getAttributes().get("userName"));
-    assertEquals("alice.dupont@example.com",
-            user.getAttributes().get("userEmail"));
+    assertEquals("alice.dupont@example.com", user.getAttributes().get("userEmail"));
   }
 
   @Test
@@ -532,8 +588,34 @@ class DatabaseProviderPluginE2ETest {
     DynamicEntity entity = DynamicEntityHelper.getEntity("TestTable1.yml");
     Map<String, Object> attrs = Map.of("id", "999999");
     entity.setAttributes(attrs);
-    assertThrows(ApiException.class, () -> provider.findById(context,
-            providerConfiguration, "999999", entity));
+    assertThrows(
+        ApiException.class,
+        () -> provider.findById(context, providerConfiguration, "999999", entity));
   }
 
+  static class JinjaServiceTest implements JinjaService {
+
+    @Override
+    public String render(TaskExecutionContext taskContext, String template) {
+      return render(taskContext, null, Map.of(), template);
+    }
+
+    @Override
+    public String render(TaskExecutionContext taskContext, DynamicEntity entity, String template) {
+      return render(taskContext, entity, Map.of(), template);
+    }
+
+    @Override
+    public String render(
+        TaskExecutionContext taskContext,
+        DynamicEntity entity,
+        Map<String, Object> map,
+        String template) {
+      var context = new HashMap<String, Object>();
+      context.put("entity", entity.getAttributes());
+      context.put("context", taskContext);
+      context.putAll(map);
+      return new Jinjava().render(template, context);
+    }
+  }
 }

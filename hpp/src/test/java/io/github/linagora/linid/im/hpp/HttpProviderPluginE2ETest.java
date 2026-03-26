@@ -70,11 +70,11 @@ class HttpProviderPluginE2ETest {
     task.addOption("source", "response");
     task.addOption("destination", "response");
     task.setPhases(List.of(
-        "beforeResponseMappingCreate",
-        "beforeResponseMappingUpdate",
-        "beforeResponseMappingPatch",
-        "beforeResponseMappingFindById",
-        "beforeResponseMappingFindAll"
+        "afterResponseCreate",
+        "afterResponseUpdate",
+        "afterResponsePatch",
+        "afterResponseFindById",
+        "afterResponseFindAll"
     ));
     return task;
   }
@@ -89,24 +89,14 @@ class HttpProviderPluginE2ETest {
     var attributes = new HashMap<String, Object>();
     var access = new HashMap<String, Object>();
     var createAccess = new HashMap<String, Object>();
-    var entityMapping = new HashMap<String, String>();
-
     providerConfiguration.addOption("baseUrl", "http://localhost:3000");
     providerConfiguration.addOption("headers", Map.of("Content-Type", "application/json"));
 
     attributes.put("test0", "value");
 
-    entityMapping.put("id1", "{{ context.response.id }}");
-    entityMapping.put("firstname1", "{{ context.response.firstname }}");
-    entityMapping.put("lastname1", "{{ context.response.lastname }}");
-    entityMapping.put("email1", "{{ context.response.email }}");
-    entityMapping.put("test1", "{{ context.response.test }}");
-    entityMapping.put("status1", "{{ context.response.status }}");
-
     createAccess.put("uri", "/v1/test_api/user");
     createAccess.put("method", "POST");
     createAccess.put("body", "{ \"test\": \"{{ entity.test0 }}\"}");
-    createAccess.put("entityMapping", entityMapping);
 
     access.put("create", createAccess);
 
@@ -119,13 +109,8 @@ class HttpProviderPluginE2ETest {
 
     assertNotNull(result);
     assertNotNull(result.getAttributes());
-    assertEquals(6, result.getAttributes().size());
-    assertEquals("1", result.getAttributes().get("id1"));
-    assertEquals("John", result.getAttributes().get("firstname1"));
-    assertEquals("Doe", result.getAttributes().get("lastname1"));
-    assertEquals("john.doe@gmail.com", result.getAttributes().get("email1"));
-    assertEquals("value", result.getAttributes().get("test1"));
-    assertEquals("created", result.getAttributes().get("status1"));
+    assertEquals(1, result.getAttributes().size());
+    assertEquals("value", result.getAttributes().get("test0"));
   }
 
   @Test
@@ -138,19 +123,10 @@ class HttpProviderPluginE2ETest {
     var attributes = new HashMap<String, Object>();
     var access = new HashMap<String, Object>();
     var findAllAccess = new HashMap<String, Object>();
-    var entityMapping = new HashMap<String, String>();
-
     providerConfiguration.addOption("baseUrl", "http://localhost:3000");
     providerConfiguration.addOption("headers", Map.of("Content-Type", "application/json"));
 
     attributes.put("test0", "value");
-
-    entityMapping.put("id1", "{{ context.response.content[index].id }}");
-    entityMapping.put("firstname1", "{{ context.response.content[index].firstname }}");
-    entityMapping.put("lastname1", "{{ context.response.content[index].lastname }}");
-    entityMapping.put("email1", "{{ context.response.content[index].email }}");
-    entityMapping.put("test1", "{{ context.response.content[index].test }}");
-    entityMapping.put("status1", "{{ context.response.content[index].status }}");
 
     findAllAccess.put("uri", "/v1/test_api/user");
     findAllAccess.put("method", "GET");
@@ -158,7 +134,6 @@ class HttpProviderPluginE2ETest {
     findAllAccess.put("size", "{{ context.response.pagination.size }}");
     findAllAccess.put("total", "{{ context.response.pagination.total }}");
     findAllAccess.put("itemsCount", "{{ context.response.content | length }}");
-    findAllAccess.put("entityMapping", entityMapping);
 
     access.put("findAll", findAllAccess);
 
@@ -179,13 +154,7 @@ class HttpProviderPluginE2ETest {
     var entityResult = result.getContent().getFirst();
 
     assertNotNull(entityResult.getAttributes());
-    assertEquals(6, entityResult.getAttributes().size());
-    assertEquals("1", entityResult.getAttributes().get("id1"));
-    assertEquals("John", entityResult.getAttributes().get("firstname1"));
-    assertEquals("Doe", entityResult.getAttributes().get("lastname1"));
-    assertEquals("john.doe@gmail.com", entityResult.getAttributes().get("email1"));
-    assertEquals("", entityResult.getAttributes().get("test1"));
-    assertEquals("retrieved", entityResult.getAttributes().get("status1"));
+    assertEquals(0, entityResult.getAttributes().size());
   }
 
   @Test
@@ -198,20 +167,11 @@ class HttpProviderPluginE2ETest {
     var attributes = new HashMap<String, Object>();
     var access = new HashMap<String, Object>();
     var findByIdAccess = new HashMap<String, Object>();
-    var entityMapping = new HashMap<String, String>();
-
     providerConfiguration.addOption("baseUrl", "http://localhost:3000");
     providerConfiguration.addOption("headers", Map.of("Content-Type", "application/json"));
 
-    entityMapping.put("id1", "{{ context.response.id }}");
-    entityMapping.put("firstname1", "{{ context.response.firstname }}");
-    entityMapping.put("lastname1", "{{ context.response.lastname }}");
-    entityMapping.put("email1", "{{ context.response.email }}");
-    entityMapping.put("status1", "{{ context.response.status }}");
-
     findByIdAccess.put("uri", "/v1/test_api/user/{{ context.id }}");
     findByIdAccess.put("method", "GET");
-    findByIdAccess.put("entityMapping", entityMapping);
 
     access.put("findById", findByIdAccess);
 
@@ -224,12 +184,7 @@ class HttpProviderPluginE2ETest {
 
     assertNotNull(result);
     assertNotNull(result.getAttributes());
-    assertEquals(5, result.getAttributes().size());
-    assertEquals("1", result.getAttributes().get("id1"));
-    assertEquals("John", result.getAttributes().get("firstname1"));
-    assertEquals("Doe", result.getAttributes().get("lastname1"));
-    assertEquals("john.doe@gmail.com", result.getAttributes().get("email1"));
-    assertEquals("retrieved", result.getAttributes().get("status1"));
+    assertEquals(0, result.getAttributes().size());
   }
 
   @Test
@@ -272,22 +227,13 @@ class HttpProviderPluginE2ETest {
     var attributes = new HashMap<String, Object>();
     var access = new HashMap<String, Object>();
     var patchAccess = new HashMap<String, Object>();
-    var entityMapping = new HashMap<String, String>();
-
     providerConfiguration.addOption("baseUrl", "http://localhost:3000");
     providerConfiguration.addOption("headers", Map.of("Content-Type", "application/json"));
 
     attributes.put("id", "1");
 
-    entityMapping.put("id1", "{{ context.response.id }}");
-    entityMapping.put("firstname1", "{{ context.response.firstname }}");
-    entityMapping.put("lastname1", "{{ context.response.lastname }}");
-    entityMapping.put("email1", "{{ context.response.email }}");
-    entityMapping.put("status1", "{{ context.response.status }}");
-
     patchAccess.put("uri", "/v1/test_api/user/{{ context.id }}");
     patchAccess.put("method", "PATCH");
-    patchAccess.put("entityMapping", entityMapping);
 
     access.put("patch", patchAccess);
 
@@ -314,22 +260,13 @@ class HttpProviderPluginE2ETest {
     var attributes = new HashMap<String, Object>();
     var access = new HashMap<String, Object>();
     var updateAccess = new HashMap<String, Object>();
-    var entityMapping = new HashMap<String, String>();
-
     providerConfiguration.addOption("baseUrl", "http://localhost:3000");
     providerConfiguration.addOption("headers", Map.of("Content-Type", "application/json"));
 
     attributes.put("id", "1");
 
-    entityMapping.put("id1", "{{ context.response.id }}");
-    entityMapping.put("firstname1", "{{ context.response.firstname }}");
-    entityMapping.put("lastname1", "{{ context.response.lastname }}");
-    entityMapping.put("email1", "{{ context.response.email }}");
-    entityMapping.put("status1", "{{ context.response.status }}");
-
     updateAccess.put("uri", "/v1/test_api/user/{{ context.id }}");
     updateAccess.put("method", "PUT");
-    updateAccess.put("entityMapping", entityMapping);
 
     access.put("update", updateAccess);
 
@@ -342,12 +279,8 @@ class HttpProviderPluginE2ETest {
 
     assertNotNull(result);
     assertNotNull(result.getAttributes());
-    assertEquals(5, result.getAttributes().size());
-    assertEquals("1", result.getAttributes().get("id1"));
-    assertEquals("John", result.getAttributes().get("firstname1"));
-    assertEquals("Doe", result.getAttributes().get("lastname1"));
-    assertEquals("john.put@gmail.com", result.getAttributes().get("email1"));
-    assertEquals("updated", result.getAttributes().get("status1"));
+    assertEquals(1, result.getAttributes().size());
+    assertEquals("1", result.getAttributes().get("id"));
   }
 
   @Test

@@ -4,36 +4,16 @@ tasks:
 access:
   create:
     table: test_table_2
-    entityMapping:
-      id: "{{ context.result.id }}"
-      userName: "{{ context.result.userName }}"
-      userEmail: "{{ context.result.userEmail }}"
   update:
     table: test_table_2
-    entityMapping:
-      id: "{{ context.result.id }}"
-      userName: "{{ context.result.userName }}"
-      userEmail: "{{ context.result.userEmail }}"
   delete:
     table: test_table_2
   findAll:
     table: test_table_2
-    entityMapping:
-      id: "{{ context.result[index].id }}"
-      userName: "{{ context.result[index].userName }}"
-      userEmail: "{{ context.result[index].userEmail }}"
   patch:
     table: test_table_2
-    entityMapping:
-      id: "{{ context.result.id }}"
-      userName: "{{ context.result.userName }}"
-      userEmail: "{{ context.result.userEmail }}"
   findById:
     table: test_table_2
-    entityMapping:
-      id: "{{ context.result.id }}"
-      userName: "{{ context.result.userName }}"
-      userEmail: "{{ context.result.userEmail }}"
 attributes:
   - name: id
     type: UUID

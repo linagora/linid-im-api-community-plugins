@@ -28,23 +28,17 @@ package io.github.linagora.linid.im.dpp;
 
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
-import io.github.linagora.linid.im.corelib.plugin.config.JinjaService;
 import io.github.linagora.linid.im.corelib.plugin.config.dto.AttributeConfiguration;
 import io.github.linagora.linid.im.corelib.plugin.config.dto.ProviderConfiguration;
 import io.github.linagora.linid.im.corelib.plugin.entity.DynamicEntity;
 import io.github.linagora.linid.im.corelib.plugin.provider.ProviderPlugin;
-import io.github.linagora.linid.im.corelib.plugin.task.TaskEngine;
 import io.github.linagora.linid.im.corelib.plugin.task.TaskExecutionContext;
 import io.github.linagora.linid.im.dpp.model.DatabasePluginConfiguration;
 import io.github.linagora.linid.im.dpp.service.CrudService;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
@@ -63,17 +57,6 @@ public class DatabaseProviderPlugin implements ProviderPlugin {
   private final CrudService crudService;
 
   /**
-   * Engine to execute tasks.
-   */
-  private final TaskEngine taskEngine;
-
-  /**
-   * Service used to render Jinja templates within URIs, request bodies, headers,
-   * and response mappings.
-   */
-  private final JinjaService jinjaService;
-
-  /**
    * Jackson ObjectMapper used to convert configuration maps into
    * {@link DatabasePluginConfiguration} instances.
    */
@@ -82,19 +65,12 @@ public class DatabaseProviderPlugin implements ProviderPlugin {
   /**
    * Constructor for DatabaseProviderPlugin.
    *
-   * @param crudService  the service to perform CRUD operations based on provider
-   *                     configuration and dynamic entity metadata
-   * @param taskEngine   the engine to execute tasks before and after CRUD
-   *                     operations
-   * @param jinjaService the service to render Jinja templates
+   * @param crudService the service to perform CRUD operations based on provider
+   *                    configuration and dynamic entity metadata
    */
   @Autowired
-  public DatabaseProviderPlugin(final CrudService crudService,
-                                final TaskEngine taskEngine,
-                                final JinjaService jinjaService) {
+  public DatabaseProviderPlugin(final CrudService crudService) {
     this.crudService = crudService;
-    this.taskEngine = taskEngine;
-    this.jinjaService = jinjaService;
   }
 
   @Override
@@ -110,12 +86,7 @@ public class DatabaseProviderPlugin implements ProviderPlugin {
 
     DynamicEntity result = crudService.insert(config, databasePluginConfiguration, dynamicEntity);
 
-    context.put("result", result.getAttributes());
-    taskEngine.execute(dynamicEntity, context, "beforeDatabaseMappingCreate");
-    var resultEntity = mappingEntity(context, databasePluginConfiguration, result);
-    taskEngine.execute(dynamicEntity, context, "afterDatabaseMappingCreate");
-
-    return resultEntity;
+    return result;
   }
 
   @Override
@@ -143,12 +114,7 @@ public class DatabaseProviderPlugin implements ProviderPlugin {
     // Perform a partial update using the provided dynamicEntity (patch payload).
     DynamicEntity result = crudService.patch(config, databasePluginConfiguration, validId, dynamicEntity);
 
-    context.put("result", result.getAttributes());
-    taskEngine.execute(dynamicEntity, context, "beforeDatabaseMappingPatch");
-    var resultEntity = mappingEntity(context, databasePluginConfiguration, result);
-    taskEngine.execute(dynamicEntity, context, "afterDatabaseMappingPatch");
-
-    return resultEntity;
+    return result;
   }
 
   @Override
@@ -166,12 +132,7 @@ public class DatabaseProviderPlugin implements ProviderPlugin {
         mapId(type, id),
         dynamicEntity);
 
-    context.put("result", result.getAttributes());
-    taskEngine.execute(dynamicEntity, context, "beforeDatabaseMappingFindById");
-    var resultEntity = mappingEntity(context, databasePluginConfiguration, result);
-    taskEngine.execute(dynamicEntity, context, "afterDatabaseMappingFindById");
-
-    return resultEntity;
+    return result;
   }
 
   @Override
@@ -186,13 +147,7 @@ public class DatabaseProviderPlugin implements ProviderPlugin {
     Page<DynamicEntity> result = crudService.select(config, databasePluginConfiguration, dynamicEntity,
         pageable);
 
-    context.put("result", result.get().map(DynamicEntity::getAttributes).toArray());
-
-    taskEngine.execute(dynamicEntity, context, "beforeDatabaseMappingFindAll");
-    Page<DynamicEntity> resultEntity = mappingEntities(context, databasePluginConfiguration, dynamicEntity, result);
-    taskEngine.execute(dynamicEntity, context, "afterDatabaseMappingFindAll");
-
-    return resultEntity;
+    return result;
   }
 
   @Override
@@ -209,84 +164,7 @@ public class DatabaseProviderPlugin implements ProviderPlugin {
         mapId(type, id),
         dynamicEntity);
 
-    context.put("result", result.getAttributes());
-    taskEngine.execute(dynamicEntity, context, "beforeDatabaseMappingUpdate");
-    DynamicEntity resultEntity = mappingEntity(context, databasePluginConfiguration, result);
-    taskEngine.execute(dynamicEntity, context, "afterDatabaseMappingUpdate");
-
-    return resultEntity;
-  }
-
-  /**
-   * Maps a single DynamicEntity using the configured Jinja templates.
-   *
-   * @param taskContext   the task execution context
-   * @param configuration the database configuration
-   * @param dynamicEntity the source entity
-   * @return the mapped entity
-   */
-  public DynamicEntity mappingEntity(final TaskExecutionContext taskContext,
-                                     final DatabasePluginConfiguration configuration,
-                                     final DynamicEntity dynamicEntity) {
-    // If no entityMapping provided, return dynamicEntity
-    if (configuration.getEntityMapping() == null || configuration.getEntityMapping().isEmpty()) {
-      return dynamicEntity;
-    }
-
-    var result = new DynamicEntity();
-
-    result.setConfiguration(dynamicEntity.getConfiguration());
-    result.setAttributes(new HashMap<>());
-
-    configuration.getEntityMapping().forEach((key, template) -> {
-      String value = jinjaService.render(taskContext, dynamicEntity, template);
-      result.getAttributes().put(key, value);
-    });
-
     return result;
-  }
-
-  /**
-   * Maps the result of a findAll operation to a list of DynamicEntity based on
-   * the database configuration and the task context.
-   *
-   * @param taskContext   the current task execution context.
-   * @param configuration the database configuration containing entity mapping
-   *                      details.
-   * @param dynamicEntity the original dynamic entity context.
-   * @param selectResult  the page of DynamicEntity returned by the select
-   *                      operation, containing raw database records.
-   * @return a pageable list of mapped entities.
-   */
-  public Page<DynamicEntity> mappingEntities(final TaskExecutionContext taskContext,
-                                             final DatabasePluginConfiguration configuration,
-                                             final DynamicEntity dynamicEntity,
-                                             final Page<DynamicEntity> selectResult) {
-    // If no entityMapping provided, return result
-    if (configuration.getEntityMapping() == null || configuration.getEntityMapping().isEmpty()) {
-      return selectResult;
-    }
-
-    List<DynamicEntity> content = new ArrayList<>();
-
-    Pageable pageable = selectResult.getPageable();
-    int itemsSize = selectResult.getContent().size();
-
-    for (int i = 0; i < itemsSize; i++) {
-      final int index = i;
-      var result = new DynamicEntity();
-
-      result.setConfiguration(dynamicEntity.getConfiguration());
-      result.setAttributes(new HashMap<>());
-
-      configuration.getEntityMapping().forEach((key, template) -> {
-        String value = jinjaService.render(taskContext, dynamicEntity, Map.of("index", index), template);
-        result.getAttributes().put(key, value);
-      });
-      content.add(result);
-    }
-
-    return new PageImpl<>(content, pageable, selectResult.getTotalElements());
   }
 
   /**

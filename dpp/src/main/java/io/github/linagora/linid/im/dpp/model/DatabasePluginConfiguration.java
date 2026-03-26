@@ -26,7 +26,6 @@
 
 package io.github.linagora.linid.im.dpp.model;
 
-import java.util.Map;
 import lombok.Data;
 
 /**
@@ -43,8 +42,4 @@ public class DatabasePluginConfiguration {
    */
   private String table;
 
-  /**
-   * A mapping between internal entity fields and database columns. Keys and values support Jinja templating.
-   */
-  private Map<String, String> entityMapping;
 }

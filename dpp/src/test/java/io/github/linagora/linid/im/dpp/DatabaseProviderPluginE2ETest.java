@@ -30,12 +30,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.hubspot.jinjava.Jinjava;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
-import io.github.linagora.linid.im.corelib.plugin.config.JinjaService;
 import io.github.linagora.linid.im.corelib.plugin.config.dto.ProviderConfiguration;
 import io.github.linagora.linid.im.corelib.plugin.entity.DynamicEntity;
-import io.github.linagora.linid.im.corelib.plugin.task.TaskEngine;
 import io.github.linagora.linid.im.corelib.plugin.task.TaskExecutionContext;
 import io.github.linagora.linid.im.dpp.registry.DslRegistry;
 import io.github.linagora.linid.im.dpp.service.CrudServiceImpl;
@@ -44,7 +41,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.AfterAll;
@@ -74,11 +70,9 @@ class DatabaseProviderPluginE2ETest {
     providerConfiguration.addOption("url", jdbcUrl);
     providerConfiguration.addOption("username", user);
     providerConfiguration.addOption("password", password);
-    var jinjaService = new JinjaServiceTest();
-    var taskEngine = new TaskEngineTest();
     dslRegistry = new DslRegistry();
     var crudService = new CrudServiceImpl(dslRegistry);
-    provider = new DatabaseProviderPlugin(crudService, taskEngine, jinjaService);
+    provider = new DatabaseProviderPlugin(crudService);
   }
 
   @AfterAll
@@ -96,13 +90,6 @@ class DatabaseProviderPluginE2ETest {
   void teardown() throws SQLException {
     stmt.close();
     conn.close();
-  }
-
-  static class TaskEngineTest implements TaskEngine {
-    @Override
-    public void execute(final DynamicEntity entity, final TaskExecutionContext context, final String hook) {
-      System.out.println("TaskEngine.mock : " + hook);
-    }
   }
 
   @Test
@@ -549,26 +536,4 @@ class DatabaseProviderPluginE2ETest {
             providerConfiguration, "999999", entity));
   }
 
-  static class JinjaServiceTest implements JinjaService {
-
-    @Override
-    public String render(TaskExecutionContext taskContext, String template) {
-      return render(taskContext, null, Map.of(), template);
-    }
-
-    @Override
-    public String render(TaskExecutionContext taskContext, DynamicEntity entity, String template) {
-      return render(taskContext, entity, Map.of(), template);
-    }
-
-    @Override
-    public String render(TaskExecutionContext taskContext, DynamicEntity entity, Map<String, Object> map,
-            String template) {
-      var context = new HashMap<String, Object>();
-      context.put("entity", entity.getAttributes());
-      context.put("context", taskContext);
-      context.putAll(map);
-      return new Jinjava().render(template, context);
-    }
-  }
 }

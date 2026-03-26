@@ -32,36 +32,21 @@ entities:
     route: accounts
     provider: ExampleDatabase
     tasks:
-      - type: json-parsing
-        phases:
-          'beforeDatabaseMappingCreate',
-          'beforeDatabaseMappingUpdate',
-          'afterDatabaseMappingUpdate',
-          'beforeDatabaseMappingFindAll',
-          'afterDatabaseMappingFindAll'
+      - type: entity-mapper
+        phases: ['afterCreate', 'afterUpdate', 'afterFindById', 'afterFindAll']
+        mapping:
+          username: '{{ entity.LOGIN }}'
     access:
       create:
         table: ACCOUNT_TABLE_NAME
-        entityMapping:
-          id: { { entity.id } }
-          username: { { entity.username } }
       update:
         table: ACCOUNT_TABLE_NAME
-        entityMapping:
-          id: { { entity.id } }
-          username: { { entity.username } }
       delete:
         table: ACCOUNT_TABLE_NAME
       findAll:
         table: ACCOUNT_TABLE_NAME
-        entityMapping:
-          id: { { entity.id } }
-          username: { { entity.username } }
       findById:
         table: ACCOUNT_TABLE_NAME
-        entityMapping:
-          id: { { entity.id } }
-          username: { { entity.username } }
     attributes:
       - name: id
         type: String
@@ -75,37 +60,29 @@ entities:
         required: true
         input: Text
         access:
-          column: USERNAME
+          column: LOGIN
 ```
 
 ### Configuration Fields
 
-| Key                                         | Required | Description                                                                        |
-| ------------------------------------------- | -------- | ---------------------------------------------------------------------------------- |
-| `providers[].name`                          | ✅       | Unique identifier for the database provider                                        |
-| `providers[].type`                          | ✅       | Must be `database` to activate this plugin                                         |
-| `providers[].url`                           | ✅       | JDBC connection URL (PostgreSQL format: `jdbc:postgresql://host:port/db`)          |
-| `providers[].username`                      | ✅       | Database authentication username                                                   |
-| `providers[].password`                      | ✅       | Database authentication password                                                   |
-| `providers[].maximumPoolSize`               | ❌       | Maximum number of connections in the pool (default: 10)                            |
-| `providers[].idleTimeout`                   | ❌       | Maximum idle time for connections in the pool (default: 600000 ms)                 |
-| `providers[].connectionTimeout`             | ❌       | Maximum time to wait for a connection from the pool (default: 30000 ms)            |
-| `entities[].provider`                       | ✅       | Reference to the database provider name                                            |
-| `entities[].access.table`                   | ✅       | Target database table name for this entity                                         |
-| `entities[].access.entityMapping`           | ❌       | Maps fields from the query result to the dynamic entity, supports Jinja templating |
-| `entities[].attributes[].access.column`     | ✅       | Target database column name for this attribute                                     |
-| `entities[].attributes[].access.primaryKey` | ❌       | Indicates if this attribute is a primary key                                       |
+| Key                                         | Required | Description                                                               |
+| ------------------------------------------- | -------- | ------------------------------------------------------------------------- |
+| `providers[].name`                          | ✅       | Unique identifier for the database provider                               |
+| `providers[].type`                          | ✅       | Must be `database` to activate this plugin                                |
+| `providers[].url`                           | ✅       | JDBC connection URL (PostgreSQL format: `jdbc:postgresql://host:port/db`) |
+| `providers[].username`                      | ✅       | Database authentication username                                          |
+| `providers[].password`                      | ✅       | Database authentication password                                          |
+| `providers[].maximumPoolSize`               | ❌       | Maximum number of connections in the pool (default: 10)                   |
+| `providers[].idleTimeout`                   | ❌       | Maximum idle time for connections in the pool (default: 600000 ms)        |
+| `providers[].connectionTimeout`             | ❌       | Maximum time to wait for a connection from the pool (default: 30000 ms)   |
+| `entities[].provider`                       | ✅       | Reference to the database provider name                                   |
+| `entities[].access.table`                   | ✅       | Target database table name for this entity                                |
+| `entities[].attributes[].access.column`     | ✅       | Target database column name for this attribute                            |
+| `entities[].attributes[].access.primaryKey` | ❌       | Indicates if this attribute is a primary key                              |
 
 ## 🛠 Behavior
 
-- For each CRUD action, the plugin executes two lifecycle phases **before** and **after** the result mapping:
-  - `beforeDatabaseMappingCreate` / `afterDatabaseMappingCreate`
-  - `beforeDatabaseMappingPatch` / `afterDatabaseMappingPatch`
-  - `beforeDatabaseMappingUpdate` / `afterDatabaseMappingUpdate`
-  - `beforeDatabaseMappingFindById` / `afterDatabaseMappingFindById`
-  - `beforeDatabaseMappingFindAll` / `afterDatabaseMappingFindAll`
-
-- These phases allow inserting custom logic at precise points during entity processing.
+- The plugin delegates entity mapping to the service layer. Post-processing (e.g., entity mapping via [`EntityMapperTaskPlugin`](../emtp/README.md)) should use the generic service-level phases (`afterCreate`, `afterUpdate`, `afterFindById`, `afterFindAll`) provided by the corelib.
 
 ---
 

@@ -34,8 +34,8 @@ import io.github.linagora.linid.im.corelib.plugin.task.TaskPlugin;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import tools.jackson.core.type.TypeReference;
 

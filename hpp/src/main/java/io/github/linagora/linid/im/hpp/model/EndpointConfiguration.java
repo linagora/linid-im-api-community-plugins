@@ -26,7 +26,6 @@
 
 package io.github.linagora.linid.im.hpp.model;
 
-import java.util.Map;
 import lombok.Data;
 
 /**
@@ -52,12 +51,6 @@ public class EndpointConfiguration {
    * The request body template, if applicable (used mainly with POST or PUT). Supports Jinja templating.
    */
   private String body;
-
-  /**
-   * A mapping between internal entity fields and fields in the external response payload. Keys and values support Jinja
-   * templating.
-   */
-  private Map<String, String> entityMapping;
 
   /**
    * A JSON path or key used to extract the actual result or main data array from the response. Supports Jinja templating.

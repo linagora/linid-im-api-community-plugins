@@ -37,7 +37,6 @@ import io.github.linagora.linid.im.hpp.service.HttpService;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -54,7 +53,7 @@ import tools.jackson.databind.ObjectMapper;
  * HTTP Provider Plugin implementation for LinID Directory Manager.
  *
  * <p>This plugin allows CRUD operations over HTTP endpoints defined via dynamic configurations.
- * It supports templated URIs, request bodies, headers, and response mappings using Jinja templates.
+ * It supports templated URIs, request bodies, headers, and pagination using Jinja templates.
  *
  * <p>Operations include create, update, patch, delete, findById, and findAll.
  * The plugin delegates actual HTTP calls to the {@link HttpService} and uses {@link JinjaService} for template rendering.
@@ -76,7 +75,7 @@ public class HttpProviderPlugin implements ProviderPlugin {
   private final HttpService httpService;
 
   /**
-   * Service used to render Jinja templates within URIs, request bodies, headers, and response mappings.
+   * Service used to render Jinja templates for pagination fields in findAll responses.
    */
   private final JinjaService jinjaService;
 
@@ -92,7 +91,7 @@ public class HttpProviderPlugin implements ProviderPlugin {
    *
    * @param taskEngine  Engine to execute lifecycle tasks before and after validation and CRUD operations.
    * @param httpService Service responsible for performing HTTP requests based on configured endpoints.
-   * @param jinjaService Service used to render Jinja templates within URIs, request bodies, headers, and response mappings.
+   * @param jinjaService Service used to render Jinja templates for pagination fields.
    */
   @Autowired
   public HttpProviderPlugin(final TaskEngine taskEngine,
@@ -116,11 +115,9 @@ public class HttpProviderPlugin implements ProviderPlugin {
     String response = httpService.request(context, providerConfiguration, endpointConfiguration, "create", dynamicEntity);
     context.put(RESPONSE, response);
 
-    taskEngine.execute(dynamicEntity, context, "beforeResponseMappingCreate");
-    var entity = mappingEntity(context, endpointConfiguration, dynamicEntity);
-    taskEngine.execute(dynamicEntity, context, "afterResponseMappingCreate");
+    taskEngine.execute(dynamicEntity, context, "afterResponseCreate");
 
-    return entity;
+    return dynamicEntity;
   }
 
   @Override
@@ -133,11 +130,9 @@ public class HttpProviderPlugin implements ProviderPlugin {
     String response = httpService.request(context, providerConfiguration, endpointConfiguration, "update", dynamicEntity);
     context.put(RESPONSE, response);
 
-    taskEngine.execute(dynamicEntity, context, "beforeResponseMappingUpdate");
-    var entity = mappingEntity(context, endpointConfiguration, dynamicEntity);
-    taskEngine.execute(dynamicEntity, context, "afterResponseMappingUpdate");
+    taskEngine.execute(dynamicEntity, context, "afterResponseUpdate");
 
-    return entity;
+    return dynamicEntity;
   }
 
   @Override
@@ -150,11 +145,9 @@ public class HttpProviderPlugin implements ProviderPlugin {
     String response = httpService.request(context, providerConfiguration, endpointConfiguration, "patch", dynamicEntity);
     context.put(RESPONSE, response);
 
-    taskEngine.execute(dynamicEntity, context, "beforeResponseMappingPatch");
-    var entity = mappingEntity(context, endpointConfiguration, dynamicEntity);
-    taskEngine.execute(dynamicEntity, context, "afterResponseMappingPatch");
+    taskEngine.execute(dynamicEntity, context, "afterResponsePatch");
 
-    return entity;
+    return dynamicEntity;
   }
 
   @Override
@@ -180,11 +173,9 @@ public class HttpProviderPlugin implements ProviderPlugin {
     String response = httpService.request(context, providerConfiguration, endpointConfiguration, "findById", dynamicEntity);
     context.put(RESPONSE, response);
 
-    taskEngine.execute(dynamicEntity, context, "beforeResponseMappingFindById");
-    var entity = mappingEntity(context, endpointConfiguration, dynamicEntity);
-    taskEngine.execute(dynamicEntity, context, "afterResponseMappingFindById");
+    taskEngine.execute(dynamicEntity, context, "afterResponseFindById");
 
-    return entity;
+    return dynamicEntity;
   }
 
   @Override
@@ -197,9 +188,8 @@ public class HttpProviderPlugin implements ProviderPlugin {
     String response = httpService.request(context, providerConfiguration, endpointConfiguration, "findAll", dynamicEntity);
     context.put(RESPONSE, response);
 
-    taskEngine.execute(dynamicEntity, context, "beforeResponseMappingFindAll");
-    Page<DynamicEntity> entities = mappingEntities(context, endpointConfiguration, dynamicEntity);
-    taskEngine.execute(dynamicEntity, context, "afterResponseMappingFindAll");
+    taskEngine.execute(dynamicEntity, context, "afterResponseFindAll");
+    Page<DynamicEntity> entities = buildPaginatedResult(context, endpointConfiguration, dynamicEntity);
 
     return entities;
   }
@@ -226,38 +216,18 @@ public class HttpProviderPlugin implements ProviderPlugin {
   }
 
   /**
-   * Maps a single entity from the HTTP response according to the entity mapping configuration.
+   * Builds a paginated result from the HTTP response using pagination configuration.
+   *
+   * <p>Extracts pagination metadata (page, size, itemsCount, total) from the endpoint configuration
+   * using Jinja templates, and creates empty {@link DynamicEntity} instances for each item.
    *
    * @param taskContext the current task execution context.
-   * @param configuration the endpoint configuration containing mapping definitions.
+   * @param configuration the endpoint configuration containing pagination details.
    * @param dynamicEntity the original dynamic entity context.
-   * @return the mapped entity.
+   * @return a pageable list of entities.
    */
-  public DynamicEntity mappingEntity(TaskExecutionContext taskContext, EndpointConfiguration configuration,
-                                     DynamicEntity dynamicEntity) {
-    var result = new DynamicEntity();
-
-    result.setConfiguration(dynamicEntity.getConfiguration());
-    result.setAttributes(new HashMap<>());
-
-    configuration.getEntityMapping().forEach((key, template) -> {
-      String value = jinjaService.render(taskContext, dynamicEntity, template);
-      result.getAttributes().put(key, value);
-    });
-
-    return result;
-  }
-
-  /**
-   * Maps a page of entities from the HTTP response using pagination and entity mapping configuration.
-   *
-   * @param taskContext the current task execution context.
-   * @param configuration the endpoint configuration containing pagination and mapping details.
-   * @param dynamicEntity the original dynamic entity context.
-   * @return a pageable list of mapped entities.
-   */
-  public Page<DynamicEntity> mappingEntities(TaskExecutionContext taskContext, EndpointConfiguration configuration,
-                                             DynamicEntity dynamicEntity) {
+  public Page<DynamicEntity> buildPaginatedResult(TaskExecutionContext taskContext, EndpointConfiguration configuration,
+                                                   DynamicEntity dynamicEntity) {
     int page = Integer.parseInt(jinjaService.render(taskContext, dynamicEntity,
         Optional.ofNullable(configuration.getPage()).orElse("0")));
     int size = Integer.parseInt(jinjaService.render(taskContext, dynamicEntity,
@@ -270,16 +240,10 @@ public class HttpProviderPlugin implements ProviderPlugin {
     List<DynamicEntity> content = new ArrayList<>();
 
     for (int i = 0; i < itemsSize; i++) {
-      final int index = i;
       var result = new DynamicEntity();
 
       result.setConfiguration(dynamicEntity.getConfiguration());
       result.setAttributes(new HashMap<>());
-
-      configuration.getEntityMapping().forEach((key, template) -> {
-        String value = jinjaService.render(taskContext, dynamicEntity, Map.of("index", index), template);
-        result.getAttributes().put(key, value);
-      });
       content.add(result);
     }
 

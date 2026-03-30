@@ -46,7 +46,7 @@ tasks:
     source: response
     destination: response
     phases:
-      - beforeResponseMapping
+      - afterResponse
 ```
 
 ### Custom source and destination
@@ -59,7 +59,7 @@ tasks:
     source: rawBody
     destination: parsedBody
     phases:
-      - beforeResponseMapping
+      - afterResponse
 ```
 
 ## Notes

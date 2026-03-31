@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- bump to latest version after entityMapping removal
 - netty support for new version
 - add json parsing task plugin
 

@@ -10,6 +10,7 @@
   <groupId>io.github.linagora.linid.im</groupId>
   <artifactId>hpp</artifactId>
   <version>0.3.0</version>
+  <packaging>jar</packaging>
   <name>http-plugin</name>
   <description>Plugin for HTTP provider and task operations</description>
   <url>https://github.com/linagora/linid-im-api-community-plugins</url>

@@ -10,7 +10,6 @@
   <groupId>io.github.linagora.linid.im</groupId>
   <artifactId>emtp</artifactId>
   <version>0.1.0</version>
-  <packaging>jar</packaging>
   <name>entity-mapper-task-plugin</name>
   <description>Plugin for mapping values from the execution context into an entity, allowing flexible configuration to extract and assign data to corresponding entity fields.</description>
   <url>https://github.com/linagora/linid-im-api-community-plugins</url>

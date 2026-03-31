@@ -10,7 +10,6 @@
   <groupId>io.github.linagora.linid.im</groupId>
   <artifactId>dpp</artifactId>
   <version>0.1.0</version>
-  <packaging>jar</packaging>
   <name>Database Provider Plugin for linid-im-api</name>
   <description>A database provider plugin for handling database operations</description>
   <url>https://github.com/linagora/linid-im-api-community-plugins</url>

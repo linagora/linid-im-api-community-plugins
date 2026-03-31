@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- bump to latest version after entityMapping removal
 - rename to http-plugin and add HttpTaskPlugin
 - netty support for new version
 - add new plugin http-provider
@@ -27,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- remove entityMapping logic
 - install jptp dependency before running tests
 - replace response-to-json task with json-parsing from jptp
 

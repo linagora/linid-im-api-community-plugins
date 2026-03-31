@@ -10,6 +10,7 @@
   <groupId>io.github.linagora.linid.im</groupId>
   <artifactId>kap</artifactId>
   <version>0.1.0</version>
+  <packaging>jar</packaging>
   <name>kafka-publish-task</name>
   <description>Task plugin to publish messages to Apache Kafka.</description>
   <url>https://github.com/linagora/linid-im-api-community-plugins</url>

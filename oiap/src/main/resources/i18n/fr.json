@@ -1,0 +1,5 @@
+{
+  "oiap.error.invalid.token": "Le jeton d'accès fourni est invalide.",
+  "oiap.error.invalid.token.type": "Type de jeton invalide : {tokenType}. Valeurs supportées : JWS, JWE, OPAQUE, NESTED.",
+  "oiap.error.jwt.processor.creation": "Échec de l'initialisation du processeur JWT. Veuillez vérifier la configuration du fournisseur OIDC."
+}

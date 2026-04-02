@@ -18,6 +18,7 @@
     <module>dpp</module>
     <module>kap</module>
     <module>emtp</module>
+    <module>oiap</module>
   </modules>
   <licenses>
     <license>

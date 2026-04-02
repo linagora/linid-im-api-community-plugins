@@ -1,0 +1,66 @@
+{
+  "authentication": "DBI",
+  "cfgDate": 1711324800,
+  "cfgNum": 1,
+  "dbiAuthChain": "dbi:Pg:dbname=llng;host=db",
+  "dbiAuthUser": "llng",
+  "dbiAuthPassword": "llng",
+  "dbiAuthTable": "users",
+  "dbiAuthLoginCol": "username",
+  "dbiAuthPasswordCol": "password",
+  "dbiAuthPasswordHash": "",
+  "dbiUserChain": "dbi:Pg:dbname=llng;host=db",
+  "dbiUserUser": "llng",
+  "dbiUserPassword": "llng",
+  "dbiUserTable": "users",
+  "dbiPasswordMailCol": "mail",
+  "userPivot": "username",
+  "dbiExportedVars": {
+    "cn": "cn",
+    "mail": "mail",
+    "uid": "username",
+    "roles": "roles"
+  },
+  "domain": "localhost",
+  "issuerDBOpenIDConnectActivation": 1,
+  "key": "t3st-s3cr3t-k3y!",
+  "locationRules": {
+    "localhost": {
+      "(?#errors)^/lmerror/": "accept",
+      "default": "accept"
+    }
+  },
+  "oidcRPMetaDataExportedVars": {
+    "linid-im": {
+      "email": "mail",
+      "name": "cn",
+      "sub": "uid",
+      "preferred_username": "uid",
+      "roles": "roles"
+    }
+  },
+  "oidcRPMetaDataOptions": {
+    "linid-im": {
+      "oidcRPMetaDataOptionsAccessTokenClaims": 1,
+      "oidcRPMetaDataOptionsAccessTokenJWT": 1,
+      "oidcRPMetaDataOptionsAccessTokenSignAlg": "RS256",
+      "oidcRPMetaDataOptionsIDTokenSignAlg": "RS256",
+      "oidcRPMetaDataOptionsAllowPasswordGrant": 1,
+      "oidcRPMetaDataOptionsBypassConsent": 1,
+      "oidcRPMetaDataOptionsClientID": "linid-im-client",
+      "oidcRPMetaDataOptionsClientSecret": "linid-im-secret",
+      "oidcRPMetaDataOptionsRedirectUris": "http://localhost:8081/callback"
+    }
+  },
+  "oidcServiceIgnoreScopeForClaims": 1,
+  "oidcServicePrivateKeySig": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC7nAiFK64as2JB\nJmvfuCn2ysx2qWbnAMiiH/xcKdbXzLEQ3mzv/g48pJK7HPmoo8813LK411Fgw8ZL\nIPoPeyW8wu02Xn4Ohr00orUQKYKv6ejVN3VdBjoo4hqxmsLDg2gn7EMU/UJccCNV\nQT0Bu6UwNpSa9kySF1qQIW6Z2h7ic98Glbesx6F2PwE+hwXO8Hk87H2X3UgrzRnS\nBRqTl56D6k6XMaNC0QjI4tia1xl9jp4Gu6fxc5r70Q+uKD3AidscnujFYlpJQH57\nfLvIsxzeCimKj5J5bPdusnx62Gmb3fpDclBssWkfQyQpkktHPi+7iDhnZjhLhA2N\n92C9Jb+RAgMBAAECggEARiXW97g33qrxE4wirKFnK2xzm/DGVZxw6FHOYcWRG9pg\n4H5SPEABocIlTQpN/TTWvvx45O05c9Vv2NqJNW2l1BkMahZVyuetajdmPRdQUqdC\n1Cpq2y//Yhb8xSipJ0KEmNzZzkjN3dNeGrwMbA/1+XuHABQU2FEcHyUo/iTVBHWL\ntP3L8P+ffCoEI5dZHKW7+IFXDjRYnk1r5IBOtzD3dMMc/MeVCv0JJweNbRIm/5k3\nzCtK3VzR2sX6Q5Gy9/AcTRmT6asMgn9Igk7BsQD9yrPTjZJOXP179XheaVjsZdv0\n8QhUg3NwPKTjUt1I2Y7df94rTIQQoeqSRdUs4soTOwKBgQDmysQcN67qVN4q4xeu\nFFft80trzyrfbdY+2wFWL91XtZ64P5YqO2ZzB/Gut0r8JeYhuJxGZI79hdDuDZpZ\nFVS16+sQ8bWjUaKV25m7Aw3sdUkotc0XPJj9B8b1rQjOApIRitmvs32QhLMRSP4p\nQgfNxWGdZbUlAnzBrFidINiTgwKBgQDQGdRIS7Rhx7YNA9t7usESfbBZAEloV/AY\nE2cLFbewfGUR/VFfpag7SrnnhHO/AhAodqVSjU8ZhidGrrHbWpI13eUohcl5PtuF\nKZDWPpwg31UBC9vlAXrZfTHo35v4fGQZ7/J2LMNgVhoVwLbHQLIcoI5n3x0Enid8\nr47zP+BwWwKBgE5WQuylBe0qM2LxRCdlZlcxPsdwQUgnexJIuhJsGsBbuG0nwCvD\nj8m5x5IbSwt9PbjydbD7DwIEut8ipOJZ+C/rzRUqRhIScpJVQMAWkFJTmSqFUwDx\nI6i3TBQ10IhEnRnxPGSEEznLoRBb61FLxWRV/AU18Z+HUZtXiZiD/p9LAoGBALmV\nr1liGlXxUwu8Wuq3HCQvbyuQM+cYNYhjFUwvbAe6iDBI518TTzrBY5Vy6/52Co7r\ncHh0iQxMNY61kOv8k9PyNcGzvn+gbQkOjppib75pLVenic1rSnHXUsFJWcF6vZLc\nCDEXro2le9HWcaq0qaMaFKXRtgE+QhzSO/v3BWNtAoGBAMfQDxMplQRmz6co5r9y\n9JoBQlpl3g5J79pBgyljJdIWZkEsDvOtfhboBjCfSugUdUm5e5Vdae2SCR+bryBz\nPLeuUplubnPOyjmnX/Pdr0bbj+JP7m9EcwvVd8Uuh/vMdr09Lk0jqFOfcfoON5m8\nAKtWz3JxjxAOV6C+Mwk/rHKo\n-----END PRIVATE KEY-----\n",
+  "oidcServicePublicKeySig": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu5wIhSuuGrNiQSZr37gp\n9srMdqlm5wDIoh/8XCnW18yxEN5s7/4OPKSSuxz5qKPPNdyyuNdRYMPGSyD6D3sl\nvMLtNl5+Doa9NKK1ECmCr+no1Td1XQY6KOIasZrCw4NoJ+xDFP1CXHAjVUE9Abul\nMDaUmvZMkhdakCFumdoe4nPfBpW3rMehdj8BPocFzvB5POx9l91IK80Z0gUak5ee\ng+pOlzGjQtEIyOLYmtcZfY6eBrun8XOa+9EPrig9wInbHJ7oxWJaSUB+e3y7yLMc\n3gopio+SeWz3brJ8ethpm936Q3JQbLFpH0MkKZJLRz4vu4g4Z2Y4S4QNjfdgvSW/\nkQIDAQAB\n-----END PUBLIC KEY-----\n",
+  "passwordDB": "DBI",
+  "persistentStorage": "Apache::Session::File",
+  "persistentStorageOptions": {
+    "Directory": "/var/lib/lemonldap-ng/psessions",
+    "LockDirectory": "/var/lib/lemonldap-ng/psessions/lock"
+  },
+  "portal": "http://localhost:8080",
+  "userDB": "DBI"
+}

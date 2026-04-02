@@ -1,0 +1,5 @@
+{
+  "oiap.error.invalid.token": "The provided access token is invalid.",
+  "oiap.error.invalid.token.type": "Invalid token type: {tokenType}. Supported values: JWS, JWE, OPAQUE, NESTED.",
+  "oiap.error.jwt.processor.creation": "Failed to initialize the JWT processor. Please verify the OIDC provider configuration."
+}

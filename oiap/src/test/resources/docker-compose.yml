@@ -1,0 +1,26 @@
+services:
+  db:
+    image: postgres:18.3-alpine
+    environment:
+      POSTGRES_DB: llng
+      POSTGRES_USER: llng
+      POSTGRES_PASSWORD: llng
+    volumes:
+      - ./llng/init-users.sql:/docker-entrypoint-initdb.d/init-users.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U llng"]
+      interval: 2s
+      timeout: 5s
+      retries: 5
+
+  lemonldap-ng:
+    image: lemonldapng/lemonldap-ng
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - PORTAL_HOSTNAME=localhost
+    ports:
+      - "8080:80"
+    volumes:
+      - ./llng/conf:/var/lib/lemonldap-ng/conf 

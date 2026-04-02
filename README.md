@@ -33,6 +33,12 @@ Each plugin is maintained in a dedicated subdirectory and follows the same struc
 | `lvp`  | Validation plugin to ensure a value belongs to a predefined list of allowed values.                                                            |
 | `dlvp` | Validation plugin to ensure a value belongs to a dynamic list fetched from an external API. Also exposes a route returning the allowed values. |
 
+### **🔐 Authentication Plugins**
+
+| Name   | Description                                                                                                                                 |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `oiap` | Authentication plugin to validate OIDC access tokens. Currently supports validation against a configurable OIDC provider for signed tokens. |
+
 ## 📦 Structure
 
 ```

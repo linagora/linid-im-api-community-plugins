@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- add field expression for patch/update/insert
 - bump to latest version after entityMapping removal
 - add database provider plugins
 
